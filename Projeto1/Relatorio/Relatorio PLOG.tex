@@ -76,11 +76,17 @@ Pedro Afonso Castro - 201304205 \\
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introdução}
+
+O principal objetivo deste projeto é adquirir competências ao nível da Programação em Lógica através do estudo de um jogo de tabuleiro previamente escolhido. Foram-nos dadas várias hipóteses de jogos, tendo nós escolhido o Syrtis, por causa da sua elevada componente estratégica e tática, bem como alguma complexidade, sempre necessária para trazer um maior sentimento de desafio quando nos é colocado um projeto em mãos.
+
 \section{O Jogo Syrtis}
+
+Segue-se uma explicação das regras do Syrtis, bem como alguns exemplos para melhor demonstrar alguns aspetos que possam ser de maior dificuldade de compreensão.
 
 \subsection{História}
 
-	O Syris é um jogo de estratégia em que os dois jogadores se encontram numa ilha instável e desconhecida. A paisagem da ilha está sempre em mudança, e o avanço do mar faz com que a ilha esteja a tornar-se cada vez mais pequena... Apenas um dos jogadores poderá sobreviver na ilha, qual conseguirá?
+	O Syris é um jogo de estratégia em que os dois jogadores se encontram numa ilha instável e desconhecida. A paisagem da ilha está sempre em mudança, e o avanço do mar faz com que a ilha esteja a tornar-se cada vez mais pequena... Para ajudar à festa, este avanço está a fazer com que se formem areias movediças, limitando ainda mais o espaço habitável na ilha... Apenas um dos jogadores poderá sobreviver, quem será capaz de ser o mais forte?
 	
 \subsection{Objetivo}
 	
@@ -147,30 +153,118 @@ Cada jogador pode mover uma das suas torres, desde que se mantenha em pelo menos
 
 \begin{figure}[h]
 \centering
-\includegraphics[scale=0.5]{towermovement.png}
+\includegraphics[scale=0.9]{towermovement.png}
 \caption{Movimento de uma torre}
 \label{fig:towermovement}
 \end{figure}
 
 A torre indicada (preta e quadrada) pode mover-se para qualquer uma das peças marcadas com uma seta, pois estas encontram-se na sua ilha quadrangular. Note-se também que ela não pode ir para a peça à sua esquerda, visto que, apesar de ser preta, esta não se encontra na sua ilha (visto que a peça em que a torre se encontra é branca e quadrada, e a peça em questão é preta e circular).
 
+\subsubsection{Afundar uma peça}
+
+Cada jogador pode remover uma peça do tabuleiro se:
+
+\begin{itemize}
+\item Esta for adjacente a uma peça ocupada por uma torre desse jogador;
+\item Esta estiver desocupada;
+\item Esta tiver pelo menos um espaço adjacente livre.
+\end{itemize}
+
+A figura \ref{fig:sinktile} mostra um exemplo de quais peças podem ser afundadas.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.9]{sinktile.png}
+\caption{Peças afundáveis}
+\label{fig:sinktile}
+\end{figure}
+
+
+O jogador preto pode afundar quaisquer peças que estejam marcadas com uma estrela. Nenuma peça branca está numa posição que lhe permita afundar alguma peça.
+
+\subsubsection{Deslocar uma peça}
+
+Um jogador poderá deslocar uma peça ocupada por uma das suas torres através de quaisquer espaços vazios que estejam conectados. A peça pode ser movida em qualquer direcção, quantas vezes quisermos, desde que a largura ou altura do tabuleiro não seja aumentada (nem mesmo a meio do movimento) e as peças do tabuleiro continuem conectadas. A figura \ref{fig:slidetile} mostra um exemplo disto.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.9]{slidetile.png}
+\caption{Peças deslocáveis}
+\label{fig:slidetile}
+\end{figure}
+
+A torre A pode mover a sua peça para a posição X, mas a torre B não pode (visto que teria de aumentar o tamanho do tabuleiro a meio da jogada para o fazer). A torre C apenas se pode deslocar para a posição Y, porque é a unica posição em que o tabuleiro continua todo conectado. A outra torre não se pode mexer.
+
+\subsubsection{Passar a vez}
+
+Basta não fazer nada e passar a vez ao outro jogador. Um jogador que não pode fazer nada é obrigado a passar.
+
+
+\subsection{Fim do jogo}
+
+Há três formas de ganhar o jogo. Uma já foi dita anteriormente (ter uma ilha completa). As outras duas são usadas principalmente para evitar empates e que os jogos durem demasiado tempo.
+
+\subsubsection{Ilha completa}
+
+Um jogador vence quando todas as peças restantes da sua cor, ou da sua forma, estão conectadas.
+Se todas as peças de uma cor ou forma estão conectadas quando o tabuleiro é inicialmente construído, o jogador que colocar as torres deve inicalmente trocar duas peças cuja numeração no formato de jogo usado (ver figuras \ref{fig:syrtismajor} e \ref{fig:syrtisminor}) sejam seguidas. Por exemplo, trocar a peça 11 com a peça 12. Deve continuar a usar-se este método até que tal deixe de acontecer.
+
+\subsubsection{Areias movediças}
+
+Se um jogador afundar quatro peças sem o outro jogador ter afundado nenhuma, o segundo perde, sendo engolido pelas areias movediças.
+Os jogadores devem controlar quantas peças afundaram desde que o outro jogador afundou a última peça.
+
+\subsubsection{Iniciativa}
+
+Esta regra existe para evitar empates. O jogo termina se alguma das seguintes situações ocorrer:
+
+\begin{itemize}
+\item Ambos os jogadores conseguem uma ilha completa ao mesmo tempo;
+\item Ambos os jogadores passam a sua vez em jogadas consecutivas (ou seja, ambos passam duas vezes cada um);
+\item Um jogador passa quatro vezes seguidas.
+\end{itemize}
+
+Em qualquer um dos casos, o último jogador a afundar uma peça ganha. Se nenhum dos jogadores tiver afundado uma peça, o jogador que jogou primeiro ganha.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.9]{win.png}
+\caption{Uma situação em que o jogador branco ganhou ao completar uma ilha de círculos.}
+\label{fig:win}
+\end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Representação do Estado do Jogo}
 
-Descrever a forma de representação do estado do tabuleiro (tipicamente uma lista de listas), com exemplificação em Prolog de posições iniciais do jogo, posições intermédias e finais, acompanhadas de imagens ilustrativas.
+O jogo será representado numa lista de listas de listas. As duas primeiras listas representarão o tabuleiro de jogo. A 3ª lista representará o conteúdo de cada quadrado do tabuleiro, utilizando o formato [Torre,Cor,Forma].
+
+\begin{itemize}
+\item \textbf{Torre:} Representa a existência ou não de uma torre no quadrado. Em caso afirmativo, utiliza a letra 'B' para representar uma torre branca, circular, e uma letra 'P' para uma torre preta, quadrangular.
+\item \textbf{Cor:} Representa a cor da do quadrado. Se for preto, utiliza-se a letra 'P', se for branco utiliza-se a letra 'B'.
+\item \textbf{Forma:} Representa a forma da peça do quadrado. Se for um círculo, usa-se a letra 'C', se for um quadrado usa-se a letra 'Q'.
+\end{itemize}
+
+Para todos os casos, a não existência do objeto implica a representação através de um espaço (' ').
+
+
+%Descrever a forma de representação do estado do %tabuleiro (tipicamente uma lista de listas), %com exemplificação em Prolog de posições %iniciais do jogo, posições intermédias e %finais, acompanhadas de imagens ilustrativas.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Visualização do Tabuleiro}
 
-Descrever a forma de visualização do tabuleiro em modo de texto e o(s) predicado(s) Prolog construídos para o efeito.
-Deve ser incluída pelo menos uma imagem correspondente ao output produzido pelo predicado de visualização.
+\textit{Descrever a forma de visualização do tabuleiro em modo de texto e o(s) predicado(s) Prolog construídos para o efeito.
+Deve ser incluída pelo menos uma imagem correspondente ao output produzido pelo predicado de visualização.}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Movimentos}
 
-Elencar os movimentos (tipos de jogadas) possíveis e definir os cabeçalhos dos predicados que serão utilizados (ainda não precisam de estar implementados).
+\textit{Elencar os movimentos (tipos de jogadas) possíveis e definir os cabeçalhos dos predicados que serão utilizados (ainda não precisam de estar implementados).}
 
+
+\section{Fontes}
+
+http://www.playsyrtis.com/interstate/
 
 \end{document}
