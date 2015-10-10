@@ -7,6 +7,7 @@
 \usepackage{indentfirst}
 \usepackage{graphicx}
 \usepackage{verbatim}
+\usepackage{listings}
 
 
 \begin{document}
@@ -144,6 +145,7 @@ Uma ilha é uma peça ou um grupo de peças que partilham a mesma forma ou cor. 
 
 
 \subsection{Acções}
+\label{sec:actions}
 
 Em cada turno cada jogador pode fazer uma de entre 4 acções possíveis: mover uma torre, afundar uma peça, deslocar uma peça, ou passar a sua vez.
 
@@ -253,15 +255,53 @@ Para todos os casos, a não existência do objeto implica a representação atra
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Visualização do Tabuleiro}
 
-\textit{Descrever a forma de visualização do tabuleiro em modo de texto e o(s) predicado(s) Prolog construídos para o efeito.
-Deve ser incluída pelo menos uma imagem correspondente ao output produzido pelo predicado de visualização.}
+O tabuleiro é visto recorrendo à interface textual do SICStus. Para efeitos de demonstração, fizemos dois tabuleiros, um do tipo Syrtis Major e outro do tipo Syrtis Minor, \textit{hard-coded}. Para os obter, faz-se uma das seguintes chamadas:
+
+\begin{lstlisting}
+major_board(Board), display_board(Board).
+\end{lstlisting}
+
+ou
+
+\begin{lstlisting}
+minor_board(Board), display_board(Board).
+\end{lstlisting}
+
+As funções irão futuramente criar um tabuleiro aleatório com o formato especificado nas figuras \ref{fig:syrtismajor} e \ref{fig:syrtisminor} respetivamente.
+
+Código da implementação (incluindo os dois tabuleiros \textit{hard-coded} ):
+
+\lstinputlisting[language=Prolog]{../board.pl}
+
+A figura \ref{fig:outputboard} mostra uma imagem com o output produzido.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{outputboard.png}
+\caption{Output produzido pelas chamadas a majorBoard e minorBoard}
+\label{fig:outputboard}
+\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Movimentos}
 
-\textit{Elencar os movimentos (tipos de jogadas) possíveis e definir os cabeçalhos dos predicados que serão utilizados (ainda não precisam de estar implementados).}
+Tal como já foi referido anteriormente na secção \ref{sec:actions}, existem 4 jogadas possíveis que um jogador pode fazer na sua jogada: mover uma torre, afundar uma peça, deslocar uma peça ou passar a vez. Apresentam-se 4 cabeçalhos para os predicados que serão utilizados para implementar estas acções:
 
+\begin{lstlisting}
+
+valid_slide(Board, StartRow, StartCol, FinalRow, FinalCol).
+slide_tile(Board, StartRow, StartCol, FinalRow, FinalCol, FinalBoard).
+
+valid_remove(Board,Row,Col).
+remove_tile(Board,Row,Col,Board).
+
+valid_move(Board, StartRow, StartCol, FinalRow, FinalCol).
+move_tower(Board, StartRow, StartCol, FinalRow, FinalCol, FinalBoard).
+
+pass(Board).
+
+\end{lstlisting}
 
 \section{Fontes}
 
