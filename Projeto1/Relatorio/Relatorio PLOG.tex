@@ -241,13 +241,72 @@ Em qualquer um dos casos, o último jogador a afundar uma peça ganha. Se nenhum
 O jogo será representado numa lista de listas de listas. As duas primeiras listas representarão o tabuleiro de jogo. A 3ª lista representará o conteúdo de cada quadrado do tabuleiro, utilizando o formato [Torre,Cor,Forma].
 
 \begin{itemize}
-\item \textbf{Torre:} Representa a existência ou não de uma torre no quadrado. Em caso afirmativo, utiliza a letra 'B' para representar uma torre branca, circular, e uma letra 'P' para uma torre preta, quadrangular.
+\item \textbf{Torre:} Representa a existência ou não de uma torre no quadrado. Em caso afirmativo, utiliza a letra 'L' para representar uma torre branca, circular, e uma letra 'T' para uma torre preta, quadrangular.
 \item \textbf{Cor:} Representa a cor da do quadrado. Se for preto, utiliza-se a letra 'P', se for branco utiliza-se a letra 'B'.
 \item \textbf{Forma:} Representa a forma da peça do quadrado. Se for um círculo, usa-se a letra 'C', se for um quadrado usa-se a letra 'Q'.
 \end{itemize}
 
 Para todos os casos, a não existência do objeto implica a representação através de um espaço (' ').
 
+Segue-se um exemplo de representação do board quando o jogo começa:
+
+\begin{lstlisting}
+beggining_board(Board) :- Board =
+[	[[' ',' ',' '], [' ',' ',' '],[' ','B','C'], [' ','B','Q'],
+	 [' ','B','Q'], [' ',' ',' '],[' ',' ',' ']],
+	[[' ',' ',' '], [' ','P','Q'],[' ','P','C'], [' ','P','Q'],
+ 	 ['L','B','C'], [' ','P','C'], [' ',' ',' ']],
+	[[' ','P','C'], [' ','B','Q'], ['L','B','C'], [' ','B','Q'],
+	 [' ','P','Q'], [' ','B','C'], [' ','B','C']],
+	[[' ','P','Q'], [' ','P','C'], [' ','P','C'], [' ',' ',' '],
+	 ['T','B','Q'], [' ','B','Q'], [' ','B','C']],
+ 	[[' ','P','Q'], [' ','P','Q'], [' ','B','C'], [' ','P','C'],
+ 	 [' ','P','Q'], [' ','P','C'], [' ','B','Q']],
+ 	[[' ',' ',' '], ['T','B','Q'], [' ','P','Q'], [' ','B','C'],
+ 	 [' ','B','Q'], [' ','B','C'], [' ',' ',' ']],
+ 	[[' ',' ',' '], [' ',' ',' '], [' ','P','C'], [' ','P','C'],
+ 	 [' ','P','Q'], [' ',' ',' '], [' ',' ',' ']]].
+\end{lstlisting}
+
+Quando o jogo está a meio:
+
+\begin{lstlisting}
+middle_board(Board) :- Board =
+[	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
+	 [' ','B','Q'], [' ',' ',' '], [' ',' ',' ']],
+ 	[[' ',' ',' '], [' ',' ',' '], [' ','P','Q'], [' ','P','C'],
+ 	 [' ','B','C'], ['T','P','Q'], [' ',' ',' ']],
+	[[' ',' ',' '], [' ',' ',' '], [' ','P','Q'], [' ',' ',' '],
+	 [' ','P','Q'], [' ',' ',' '], [' ',' ',' ']],
+	[[' ',' ',' '], [' ',' ',' '], ['L','B','C'], [' ',' ',' '],
+	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
+ 	[[' ',' ',' '], [' ',' ',' '], [' ','P','C'], [' ','B','Q'],
+ 	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
+ 	[[' ',' ',' '], ['T','B','Q'], [' ','B','C'], ['L','B','C'],
+ 	 [' ','P','Q'], [' ',' ',' '], [' ',' ',' ']],
+ 	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
+ 	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']]].
+\end{lstlisting}
+
+E quando o jogo acaba:
+
+\begin{lstlisting}
+end_board(Board) :- Board =
+[	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
+	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
+ 	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
+ 	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
+	[[' ',' ',' '], [' ',' ',' '], ['L','B','C'], [' ',' ',' '],
+	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
+	[[' ',' ',' '], [' ',' ',' '], [' ','P','C'], [' ','Q','B'],
+	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
+ 	[[' ',' ',' '], [' ',' ',' '], [' ','P','C'], [' ','B','C'],
+ 	 ['T','B','C'], [' ',' ',' '], [' ',' ',' ']],
+ 	[['L','B','Q'], [' ','B','C'], ['T','P','Q'], [' ','P','Q'],
+ 	 [' ','P','Q'], [' ',' ',' '], [' ',' ',' ']],
+ 	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
+ 	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']]].
+\end{lstlisting}
 
 %Descrever a forma de representação do estado do %tabuleiro (tipicamente uma lista de listas), %com exemplificação em Prolog de posições %iniciais do jogo, posições intermédias e %finais, acompanhadas de imagens ilustrativas.
 
@@ -255,7 +314,7 @@ Para todos os casos, a não existência do objeto implica a representação atra
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Visualização do Tabuleiro}
 
-O tabuleiro é visto recorrendo à interface textual do SICStus. Para efeitos de demonstração, fizemos dois tabuleiros, um do tipo Syrtis Major e outro do tipo Syrtis Minor, \textit{hard-coded}. Para os obter, faz-se uma das seguintes chamadas:
+Para efeitos de demonstração, fizemos dois tabuleiros, um do tipo Syrtis Major e outro do tipo Syrtis Minor, \textit{hard-coded}. Para os obter, faz-se uma das seguintes chamadas:
 
 \begin{lstlisting}
 major_board(Board), display_board(Board).
