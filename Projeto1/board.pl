@@ -19,16 +19,16 @@ major_board(Board) :- Board =
 ].
  
 minor_board(Board) :- Board =
-	[[[' ',' ',' '], [' ',' ',' '], ['L','B','C'], [' ','B','Q'],
+	[[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
 	 [' ',' ',' ']],
-	[[' ','P','Q'], [' ','P','C'], [' ','P','C'], ['T','B','Q'],
+	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
 	 [' ',' ',' ']],
- 	[[' ','P','Q'], [' ','P','Q'], [' ',' ',' '], [' ','P','C'],
- 	 [' ','P','Q']],
- 	[[' ',' ',' '], ['T','B','Q'], [' ','P','Q'], [' ','B','C'],
- 	 [' ','B','Q']],
- 	[[' ',' ',' '], [' ',' ',' '], [' ','P','C'],
- 	 [' ','P','C'], [' ',' ',' ']]].
+ 	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
+ 	 [' ',' ',' ']],
+ 	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
+ 	 [' ',' ',' ']],
+ 	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
+ 	 [' ',' ',' ']]].
 
 display_board(Board) :- write_col_coords(Board), display_board_aux(Board,1).
 
@@ -65,6 +65,12 @@ write_col_coords_aux([_|Line],Charcode) :- Line \= [],
 char_code(Character,Charcode), write('  '), write(Character),
 write(' '), Nextchar is Charcode+1, write_col_coords_aux(Line,Nextchar). 
 
+% Return L[X][Y]
+return_element(L,X,Y,Elem) :- return_element_aux_x(L,X,Y,Elem).
+return_element_aux_x([H|_],0,Y,Elem) :- return_element_aux_y(H,Y,Elem).
+return_element_aux_x([_|T],X,Y,Elem) :- X>0,Z is X-1, return_element_aux_x(T,Z,Y,Elem).
+return_element_aux_y([H|_],0,H). 
+return_element_aux_y([_|T],Y,Elem) :- Y>0,Z is Y-1, return_element_aux_y(T,Z,Elem).
 
 %Replace L[X][Y] with NElem
 replace_element(L,X,Y,NElem,NL) :- replace_element_aux_x(L,X,Y,NElem,NL).
@@ -79,7 +85,10 @@ insert_tower_aux_x([H|T],0,Y,Tower,[NH|T]) :- insert_tower_aux_y(H,Y,Tower, NH).
 insert_tower_aux_x([H|L],X,Y,Tower,[H|NL]) :- X>0,Z is X-1, insert_tower_aux_x(L,Z,Y,Tower,NL).
 insert_tower_aux_y([H|T],0,Tower,[NElem|T]) :- insert_tower_into_place(H,Tower,NElem).
 insert_tower_aux_y([H|L],Y,Tower,[H|NL]) :- Y>0,Z is Y-1, insert_tower_aux_y(L,Z,Tower,NL).
-insert_tower_into_place([_|T],Tower,[Tower|T]).
+insert_tower_into_place([_|['P',B]],'T',['T'|['P',B]]).
+insert_tower_into_place([_|[A,'Q']],'T',['T'|[A,'Q']]).
+insert_tower_into_place([_|['B',B]],'L',['L'|['B',B]]).
+insert_tower_into_place([_|[A,'C']],'L',['L'|[A,'C']]).
 
 % Start game
 start_game :- write('Please state the board you want (major/minor): '), read(X), create_board(_,X).
@@ -124,12 +133,14 @@ replace_board(Board,X1,Y1,X2,Y2,2,NBoard) :- replace_element(Board,X1,Y1,[' ','B
 replace_board(Board,X1,Y1,X2,Y2,3,NBoard) :- replace_element(Board,X1,Y1,[' ','P','Q'],TBoard), replace_element(TBoard,X2,Y2,[' ','B','C'],NBoard).
 
 % Jogador 1 coloca as torres
-
 pick_tower(Board) :- display_board(Board), write('Player 1: State the vertical coordinate of the first white tower: (Ex: a.)'), read(Character),  write('State the horizontal coordinate of the first white tower: (Ex: 1.)'), read(N), write('\n'), char_code(Character,Charcode), Y is Charcode-97, X is N-1, insert_tower(Board, X, Y, 'L', NBoard), pick_tower2(NBoard).
 pick_tower2(Board) :- display_board(Board), write('Player 1: State the vertical coordinate of the second white tower: (Ex: a.)'), read(Character),  write('State the horizontal coordinate of the second white tower: (Ex: 1.)'), read(N), write('\n'), char_code(Character,Charcode), Y is Charcode-97, X is N-1, insert_tower(Board, X, Y, 'L', NBoard), pick_tower3(NBoard).
 pick_tower3(Board) :- display_board(Board), write('Player 1: State the vertical coordinate of the first black tower: (Ex: a.)'), read(Character),  write('State the horizontal coordinate of the first black tower: (Ex: 1.)'), read(N), write('\n'), char_code(Character,Charcode), Y is Charcode-97, X is N-1, insert_tower(Board, X, Y, 'T', NBoard), pick_tower4(NBoard).
 pick_tower4(Board) :- display_board(Board), write('Player 1: State the vertical coordinate of the second black tower: (Ex: a.)'), read(Character),  write('State the horizontal coordinate of the second black tower: (Ex: 1.)'), read(N), write('\n'), char_code(Character,Charcode), Y is Charcode-97, X is N-1, insert_tower(Board, X, Y, 'T', NBoard), pick_colour(NBoard).
 
 % Jogador 2 escolhe a cor
-
-pick_colour(Board) :- display_board(Board), write('Player 2: Choose your colour. From now on you will be identified with your colour (white/black): '), read(Colour), write(Colour).
+pick_colour(Board) :- display_board(Board), write('Player 2: Choose your colour. From now on you will be identified with your colour (white/black): '), read(Colour), colour_picked(Board,Colour).
+colour_picked(Board,'white') :- write('White: Your turn to play\n'), display_board(Board). 
+colour_picked(Board,'w') :- write('White: Your turn to play\n'), display_board(Board). 
+colour_picked(Board,'black') :- write('White: Your turn to play\n'), display_board(Board). 
+colour_picked(Board,'b') :- write('White: Your turn to play\n'), display_board(Board). 
