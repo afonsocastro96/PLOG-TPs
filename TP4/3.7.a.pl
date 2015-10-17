@@ -1,0 +1,1 @@
+before(A,B,L) :- append(_,[A|T],L),append(_,[B|_],T).
