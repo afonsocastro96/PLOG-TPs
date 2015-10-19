@@ -99,7 +99,13 @@ remove_tower_aux_y([H|T],0,[NElem|T]) :- remove_tower_from_place(H,NElem).
 remove_tower_aux_y([H|L],Y,Tower,[H|NL]) :- Y>0,Z is Y-1, remove_tower_aux_y(L,Z,NL).
 remove_tower_from_place([_|T],[' '|T]).
 
+%Board Size
 
+board_size(Board, SizeX, SizeY) :- board_size_aux_x(Board,SizeX,SizeY).
+board_size_aux_x([],SizeX,SizeY) :- board_size_aux_y(H,SizeY).
+board_size_aux_x([H|T],SizeX, SizeY) :- X is SizeX+1, board_size_aux_x(X,SizeY).
+board_size_aux_y([],SizeX,SizeY) :- board_size_aux_y(H,SizeY).
+board_size_aux_y([H|T],SizeX, SizeY) :- X is SizeX+1, board_size_aux_x(X,SizeY).
 
 %Start game
 start_game :- write('Please state the board you want (major/minor): '), read(X), create_board(_,X).
