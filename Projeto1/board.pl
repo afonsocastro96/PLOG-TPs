@@ -100,12 +100,11 @@ remove_tower_aux_y([H|L],Y,Tower,[H|NL]) :- Y>0,Z is Y-1, remove_tower_aux_y(L,Z
 remove_tower_from_place([_|T],[' '|T]).
 
 %Board Size
-
 board_size(Board, SizeX, SizeY) :- board_size_aux_x(Board,SizeX,SizeY).
 board_size_aux_x([],SizeX,SizeY) :- board_size_aux_y(H,SizeY).
 board_size_aux_x([H|T],SizeX, SizeY) :- X is SizeX+1, board_size_aux_x(X,SizeY).
-board_size_aux_y([],SizeX,SizeY) :- board_size_aux_y(H,SizeY).
-board_size_aux_y([H|T],SizeX, SizeY) :- X is SizeX+1, board_size_aux_x(X,SizeY).
+board_size_aux_y([],SizeY).
+board_size_aux_y([H|T], SizeY) :- Y is SizeY+1, board_size_aux_x(T,Y).
 
 %Start game
 start_game :- write('Please state the board you want (major/minor): '), read(X), create_board(_,X).
@@ -164,16 +163,16 @@ colour_picked(Board,'w') :- write('White: Your turn to play\n'), display_board(B
 colour_picked(Board,'black') :- write('White: Your turn to play\n'), display_board(Board). 
 colour_picked(Board,'b') :- write('White: Your turn to play\n'), display_board(Board). 
 
-%replace_element(L,X,Y,NElem,NL)
-valid_slide(Board,X,Y,NX,NY) :- return_element(Board,X,Y,Elem), valid_slide_aux(Board,X,Y,NX,NY,Elem).
-valid_slide_aux(Board,X,Y,X,Y,Elem) :- return_element(Board,X,Y,Elem). % Mera verificacao, muito provavelmente ate se pode apagar.
-valid_slide_aux(Board,X,Y,NX,NY,Elem) :- X >= 0, Y >= 0, board_size(Board, SizeX, SizeY), X < SizeX, Y < SizeY,
-										 return_element(Board,X,Y,Elem). 
-										 A is X+1, B is Y+1, C is X-1, D is Y+1,
-										 valid_slide_aux(Board,A,Y,NX,NY,Elem),
-										 valid_slide_aux(Board,X,B,NX,NY,Elem),
-										 valid_slide_aux(Board,C,Y,NX,NY,Elem),
-										 valid_slide_aux(Board,X,D,NX,NY, Elem).
+%valid_slide
+valid_slide(Board,X,Y,NX,NY,Visited) :- X >= 0, Y >= 0, board_size(Board, SizeX, SizeY), X < SizeX, Y < SizeY, \+ member(Element, Visited),
+										 return_element(Board,X,Y,[' ',' ',' ']), valid_slide_aux(Board,X,Y,NX,NY).
+valid_slide_aux(Board,X,Y,X,Y).
+valid_slide_aux(Board,X,Y,NX,NY) :- A is X+1, valid_slide(Board,A,Y,NX,NY).
+valid_slide_aux(Board,X,Y,NX,NY) :- B is Y+1, valid_slide(Board,X,B,NX,NY).
+valid_slide_aux(Board,X,Y,NX,NY) :- C is X-1, valid_slide(Board,C,Y,NX,NY).
+valid_slide_aux(Board,X,Y,NX,NY) :- D is Y-1, valid_slide(Board,X,D,NX,NY).
+
+
 slide_tile(Board,X,Y,NX,NY,NBoard) :- return_element(Board,X,Y,Elem), replace_element(Board,NX,NY,Elem,TBoard), replace_element(TBoard,X,Y,[' ', ' ', ' '],NBoard).
 remove_tile(Board,X,Y,NBoard) :- replace_element(Board,X,Y,[' ', ' ', ' '],NBoard).
 move_tower(Board,X,Y,NX,NY,NBoard) :- return_element(Board,X,Y,[Tower|_]), insert_tower(Board, NX, NY, Tower,TBoard), remove_tower(TBoard,X,Y,NBoard).
