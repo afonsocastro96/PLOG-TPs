@@ -1,69 +1,36 @@
 %MODULES
 :- use_module(library(random)).
+:- dynamic board_cell/3.
+:- dynamic board_length/1.
 
-major_board(Board) :- Board =
-[	[[' ',' ',' '], [' ',' ',' '],[' ',' ',' '], [' ',' ',' '],
-	 [' ',' ',' '], [' ',' ',' '],[' ',' ',' ']],
-	[[' ',' ',' '], [' ',' ',' '],[' ',' ',' '], [' ',' ',' '],
- 	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
-	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
-	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
-	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
-	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
- 	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
- 	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
- 	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
- 	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
- 	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
- 	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']]
-].
- 
-minor_board(Board) :- Board =
-	[[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
-	 [' ',' ',' ']],
-	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
-	 [' ',' ',' ']],
- 	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
- 	 [' ',' ',' ']],
- 	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
- 	 [' ',' ',' ']],
- 	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
- 	 [' ',' ',' ']]].
+create_database(N) :- N > 0, assert(board_length(N)), create_database_aux(0, 0).
 
-display_board(Board) :- write_col_coords(Board), display_board_aux(Board,1).
+create_database_aux(Row, Col) :- board_length(Length), Row < Length, Col < Length, !, assert(board_cell(Row, Col, [' ', ' ', ' '])), NCol is Col + 1, create_database_aux(Row,NCol).
+create_database_aux(Row, Col) :- board_length(Length), Row < Length, !, NRow is Row + 1, create_database_aux(NRow, 0).
+create_database_aux(Row, _) :- board_length(Row).
 
-display_board_aux([Line | Board],Number) :- Board \= [], write_border(Line),
-write_line(Line, Number), NextNumber is Number + 1,
-display_board_aux(Board,NextNumber).
+display_board :- write_col_coords, display_board_row(0).
 
-display_board_aux([Line], Number) :-write_border(Line),
-write_line(Line, Number), write_border(Line).
+display_board_row(Row) :- board_length(Length), Row < Length, !, write_border, write_line(Row), NRow is Row + 1, display_board_row(NRow).
+display_board_row(Row) :- board_length(Row), !, write_border.
 
-write_border([_|Line]) :- write('   +---'), write_border_aux(Line).
+write_border :- write('   '), write_border_aux(0).
 
-write_border_aux([]) :- write('+\n').
+write_border_aux(Col) :- board_length(Col), !, write('+\n').
 
-write_border_aux([_|Line]) :- write('+---'), write_border_aux(Line).
+write_border_aux(Col) :- board_length(Length), Col < Length, !, write('+---'), NCol is Col + 1, write_border_aux(NCol).
 
-write_aux_line([]) :- write('|\n').
+write_aux_line(_, Col) :- board_length(Col), !, write('|\n').
+write_aux_line(Row, Col) :- board_length(Length), Col < Length, !, write('|'), write_elem(Row, Col), NCol is Col + 1, write_aux_line(Row, NCol).
 
-write_aux_line([Elem|Line]) :- write('|'), write_elem(Elem),
-write_aux_line(Line).
+write_line(Row) :- format(' ~d ', [Row]), write_aux_line(Row, 0).
 
-write_line(Line, Number) :- write(' '), write(Number), write(' '),
-write_aux_line(Line).
+write_elem(Row,Col) :- board_cell(Row, Col, [Tower, Colour, Shape]), write(Tower), write(Colour), write(Shape).
 
-write_elem([Tower,Colour,Shape]) :- write(Tower), write(Colour), write(Shape).
+write_col_coords :- write('   '), write_col_coords_aux(0).
+write_col_coords_aux(Col) :- board_length(Length), Col < Length, !, Charcode is Col + 65, format('  ~c ', [Charcode]), NCol is Col + 1, write_col_coords_aux(NCol).
+write_col_coords_aux(Col) :- board_length(Length), Col is Length, !, write(' \n').
 
-write_col_coords([Line | _]) :- write('   '),
-write_col_coords_aux(Line,65).
-
-write_col_coords_aux([_],Charcode) :- char_code(Character,Charcode),
-write('  '), write(Character), write('\n').
-
-write_col_coords_aux([_|Line],Charcode) :- Line \= [],
-char_code(Character,Charcode), write('  '), write(Character),
-write(' '), Nextchar is Charcode+1, write_col_coords_aux(Line,Nextchar). 
 
 % Return L[X][Y]
 return_element(L,X,Y,Elem) :- return_element_aux_x(L,X,Y,Elem).
