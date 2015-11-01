@@ -143,7 +143,7 @@ pass.
 %valid_slide(Board,X,Y,NX,NY,Visited) :- X >= 0, Y >= 0, board_size(Board, SizeX, SizeY), X < SizeX, Y < SizeY, \+ member(Element, Visited),
 %										 return_element(Board,X,Y,[' ',' ',' ']), valid_slide_aux(Board,X,Y,NX,NY).
 %valid_slide_aux(Board,X,Y,X,Y).
-%valid_slide_aux(Board,X,Y,NX,NY) :- A is X+1, valid_slide(Board,A,Y,NX,NY).
+%valid_slide_aux(Board,X,Y,NX,NY) :- A is X+1, valid_slide(Board,A,Y,NX,NY). 
 %valid_slide_aux(Board,X,Y,NX,NY) :- B is Y+1, valid_slide(Board,X,B,NX,NY).
 %valid_slide_aux(Board,X,Y,NX,NY) :- C is X-1, valid_slide(Board,C,Y,NX,NY).
 %valid_slide_aux(Board,X,Y,NX,NY) :- D is Y-1, valid_slide(Board,X,D,NX,NY).
