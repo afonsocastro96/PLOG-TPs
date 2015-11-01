@@ -73,6 +73,10 @@ remove_colour('P') :- number_blacks(N), NB is N-1, retract(number_blacks(N)), as
 remove_shape('Q') :- number_squares(N), NS is N-1, retract(number_squares(N)), assert(number_squares(NS)).
 remove_shape('C') :- number_circles(N), NC is N-1, retract(number_circles(N)), assert(number_circles(NC)). 
 
+%Tiles sinked counter
+sink_count(Player) :- sink_streak(Player,Streak), NStreak is Streak+1, retract(sink_streak(_, Streak)), assert(sink_streak(Player,NStreak).
+sink_count(Player) :- sink_streak(OPlayer,_), Player \= OPlayer, retract(sink_streak(_,_)), assert(sink_streak(Player, 1).
+
 % Board randomizer
 randomize_board_major :- randomize(N), replace_board(3,2,3,4,N), randomize_board_major_3.
 randomize_board_major_3 :- randomize(N), replace_board(3,1,3,5,N), randomize_board_major_5.
@@ -91,7 +95,7 @@ randomize_board_major_27 :- randomize(N), replace_board(1,2,5,4,N), randomize_bo
 randomize_board_major_29 :- randomize(N), replace_board(1,1,5,5,N), randomize_board_major_31.
 randomize_board_major_31 :- randomize(N), replace_board(0,2,6,4,N), randomize_board_major_33.
 randomize_board_major_33 :- randomize(N), replace_board(0,3,6,3,N), randomize_board_major_35.
-randomize_board_major_35 :- randomize(N), replace_board(0,4,6,2,N), number_squares(S), write('\n'), write(S), write('\n\n'), display_board.	
+randomize_board_major_35 :- randomize(N), replace_board(0,4,6,2,N), pick_tower.	
 
 randomize_board_minor :- randomize(N), replace_board(2,1,2,3,N), randomize_board_minor_3.
 randomize_board_minor_3 :- randomize(N), replace_board(2,0,2,4,N), randomize_board_minor_5.
@@ -100,12 +104,12 @@ randomize_board_minor_7 :- randomize(N), replace_board(1,1,3,3,N), randomize_boa
 randomize_board_minor_9 :- randomize(N), replace_board(1,2,3,2,N), randomize_board_minor_11.
 randomize_board_minor_11 :- randomize(N), replace_board(1,3,3,1,N), randomize_board_minor_13.
 randomize_board_minor_13 :- randomize(N), replace_board(0,3,4,1,N), randomize_board_minor_15.
-randomize_board_minor_15 :- randomize(N), replace_board(0,2,4,2,N), number_squares(S), write('\n'), write(S), write('\n\n'), display_board.
+randomize_board_minor_15 :- randomize(N), replace_board(0,2,4,2,N), pick_tower.
 
 % Auxiliary function of the randomizer. 0-BC 1-PC 2-BQ 3-PQ
 replace_board(X1,Y1,X2,Y2,0) :- change_tile(X1,Y1,[' ','B','C']), change_tile(X2,Y2,[' ','P','Q']), add_colour_shape('B', 'C'), add_colour_shape('P', 'Q').
-replace_board(X1,Y1,X2,Y2,1) :- change_tile(X1,Y1,[' ','P','C']), change_tile(X2,Y2,[' ','B','Q']), add_colour_shape('B', 'Q'), add_colour_shape('B', 'Q').
-replace_board(X1,Y1,X2,Y2,2) :- change_tile(X1,Y1,[' ','B','Q']), change_tile(X2,Y2,[' ','P','C']), add_colour_shape('P', 'C'), add_colour_shape('P', 'C').
+replace_board(X1,Y1,X2,Y2,1) :- change_tile(X1,Y1,[' ','P','C']), change_tile(X2,Y2,[' ','B','Q']), add_colour_shape('P', 'C'), add_colour_shape('B', 'Q').
+replace_board(X1,Y1,X2,Y2,2) :- change_tile(X1,Y1,[' ','B','Q']), change_tile(X2,Y2,[' ','P','C']), add_colour_shape('B', 'Q'), add_colour_shape('P', 'C').
 replace_board(X1,Y1,X2,Y2,3) :- change_tile(X1,Y1,[' ','P','Q']), change_tile(X2,Y2,[' ','B','C']), add_colour_shape('P', 'Q'), add_colour_shape('B', 'C').
 
 % Player 1 picks the towers
@@ -126,8 +130,8 @@ colour_picked('black') :- write('White: Your turn to play\n'), display_board.
 colour_picked('b') :- write('White: Your turn to play\n'), display_board. 
 
 % Make play
-make_play :- write('Make your move (slide/remove/movetower/pass): '), read(Move), make_play_aux(Move), display_board.
-make_play_aux(Move) :- Move == 'remove', remove_tile_aux.
+make_play :- write('Make your move (slide/sink/movetower/pass): '), read(Move), make_play_aux(Move), display_board.
+make_play_aux(Move) :- Move == 'sink', sink_tile_aux.
 make_play_aux(Move) :- Move == 'movetower', move_tower_aux.
 make_play_aux(Move) :- Move == 'slide', slide_tile_aux.
 make_play_aux(Move) :- Move == 'pass', pass.
@@ -141,10 +145,10 @@ slide_tile_aux :- 	write('\nState the vertical coordinate of the tile you want t
 					char_code(NCharacter,NCharcode), write('\n'), NY is NCharcode-97, NX is NNumber-1,
 					slide_tile(X,Y,NX,NY).
 
-remove_tile_aux :-	write('\nState the vertical coordinate of the tile you want to remove: (Ex: a.)'), read(Character),
+sink_tile_aux :-	write('\nState the vertical coordinate of the tile you want to remove: (Ex: a.)'), read(Character),
 					write('\nState the horizontal coordinate of the tile you want to remove: (Ex: 1.)'), read(Number),
 					char_code(Character,Charcode), write('\n'), Y is Charcode-97, X is Number-1,
-					remove_tile(X,Y).
+					sink_tile(X,Y).
 
 move_tower_aux :- 	write('\nState the vertical coordinate of the tower you want to move: (Ex: a.)'), read(Character),
 					write('\nState the horizontal coordinate of the tower you want to move: (Ex: 1.)'), read(Number),
@@ -156,12 +160,12 @@ move_tower_aux :- 	write('\nState the vertical coordinate of the tower you want 
 
 % The four possible plays. TODO: Make invalid moves impossible
 slide_tile(X,Y,NX,NY) :- board_cell(X,Y,Elem), change_tile(NX,NY,Elem), change_tile(X,Y,[' ', ' ', ' ']).
-remove_tile(X,Y) :- change_tile(X,Y,[' ', ' ', ' ']).
+sink_tile(X,Y) :- change_tile(X,Y,[' ', ' ', ' ']).
 move_tower(X,Y,NX,NY) :- board_cell(X,Y,[Tower|_]), insert_tower(NX, NY, Tower), remove_tower(X,Y).
 pass.
 
 % Check end game condition
-check_end_game :- sink_streak(Winner, 4).
+check_end_game :- sink_streak(Winner, 4), write('\nPlayer '), write(Winner), write(' has won the game!').
 
 %valid_slide
 %valid_slide(Board,X,Y,NX,NY,Visited) :- X >= 0, Y >= 0, board_size(Board, SizeX, SizeY), X < SizeX, Y < SizeY, \+ member(Element, Visited),
