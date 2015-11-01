@@ -172,11 +172,24 @@ check_end_game :- sink_streak(Winner, 4).
 %valid_slide_aux(Board,X,Y,NX,NY) :- C is X-1, valid_slide(Board,C,Y,NX,NY).
 %valid_slide_aux(Board,X,Y,NX,NY) :- D is Y-1, valid_slide(Board,X,D,NX,NY).
 
-valid_slide(X, Y, FinalX, FinalY) :- board_cell(FinalX, FinalY, [' ',' ',' ']), !, valid_slide_aux(FinalX, FinalY, [[X, Y]], []).
+%valid_slide still doesn't check if the board remains connected
+valid_slide(X, Y, FinalX, FinalY) :- board_cell(FinalX, FinalY, [' ',' ',' ']), !, valid_slide_aux(X, Y, [[FinalX, FinalY]], []).
 valid_slide_aux(FinalX, FinalY, [[FinalX, FinalY]|_], _).
 valid_slide_aux(FinalX, FinalY, [Next|T], Visited) :- member(Next, Visited), !, valid_slide_aux(FinalX, FinalY, T, Visited).
-valid_slide_aux(FinalX, FinalY, [[NextX, NextY]| T], Visited) :- \+ member([NextX, NextY], Visited), board_cell(NextX, NextY, [' ',' ',' ']), !,
-	Alt1 is [NextX+1, NextY], Alt2 is [NextX-1, NextY], Alt3 is [NextX, NextY+1], Alt4 is [NextX, NextY-1], append(T, [Alt1, Alt2, Alt3, Alt4], NT)
-	valid_slide_aux(FinalX, FinalY, NT, [[NextX, NextY] | Visited]).
+valid_slide_aux(FinalX, FinalY, [[X, Y]| T], Visited) :- \+ member([X, Y], Visited), board_cell(X, Y, [' ',' ',' ']), !,
+	NX is X + 1, PX is X - 1, NY is Y + 1, PY is Y - 1,
+	Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY], append(T, [Alt1, Alt2, Alt3, Alt4], NT),
+	valid_slide_aux(FinalX, FinalY, NT, [[X, Y] | Visited]).
 valid_slide_aux(FinalX, FinalY, [[NextX, NextY]|T], Visited) :- \+ member([NextX,NextY], Visited), \+ board_cell(NextX, NextY, [' ',' ',' ']), !,
 	valid_slide_aux(FinalX, FinalY, T, [[NextX, NextY]|Visited]).
+
+connected_board :- 	board_cell(X, Y, [_, 'P', _]), reachable_tiles(X, Y, Tiles), length(Tiles, L), number_blacks(B), number_whites(W), !, L is B + W.
+
+reachable_tiles(X, Y, Tiles) :- reachable_tiles_aux([[X,Y]],[], Tiles).
+reachable_tiles_aux([],_, []).
+reachable_tiles_aux([Next|T], Visited, Reachable) :- member(Next, Visited), !, reachable_tiles_aux(T, Visited, Reachable).
+reachable_tiles_aux([[X, Y]|T], Visited, [[X, Y]|Reachable]) :- board_cell(X, Y, Cell), Cell \= [' ', ' ', ' '], !,
+	NX is X + 1, PX is X - 1, NY is Y + 1, PY is Y - 1,
+	Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY], append(T, [Alt1, Alt2, Alt3, Alt4], NT),
+	reachable_tiles_aux(NT, [[X,Y]|Visited], Reachable).
+reachable_tiles_aux([Next|T], Visited, Reachable) :- reachable_tiles_aux(T, [Next|Visited], Reachable).
