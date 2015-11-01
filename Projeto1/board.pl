@@ -46,15 +46,20 @@ insert_tower(X,Y,'T') :- board_cell(X,Y,[' ',_,_]), \+ board_cell(X,Y,[_,'B','C'
 remove_tower(X,Y) :- board_cell(X,Y,[_,Colour,Shape]), change_tile(X,Y,[' ', Colour, Shape]).
 
 %Start game
-start_game :- board_length(Length), purge_database(Length), write('Please state the board you want (major/minor): '), read(X), create_board(X).
-start_game :- write('Please state the board you want (major/minor): '), read(X), create_board(X).
+start_game :- board_length(Length), purge_database(Length), game. %Esta linha vai ser apagada, so esta aqui para nao ter de fazer isto a toda a hora.
+start_game :- game.
+game :- write('Please state the board you want (major/minor): '), read(X), create_board(X), pick_tower, pick_colour, game_cycle, write('\nPlayer '), current_player(Player), write(Player), write(' has won the game!').
 create_board(minor) :- create_database(5), randomize_board_minor.
 create_board(major) :- create_database(7), randomize_board_major.
 
 %Randomize board
 randomize(N) :- random(0,4,N).
 
-%Database modifiers
+/****************
+
+Database modifiers
+
+*****************/
 
 %Changes a tile's content
 change_tile(X,Y,[Tower,Colour,Shape]) :- retract(board_cell(X,Y,_)), assert(board_cell(X,Y,[Tower,Colour,Shape])).
@@ -73,9 +78,13 @@ remove_colour('P') :- number_blacks(N), NB is N-1, retract(number_blacks(N)), as
 remove_shape('Q') :- number_squares(N), NS is N-1, retract(number_squares(N)), assert(number_squares(NS)).
 remove_shape('C') :- number_circles(N), NC is N-1, retract(number_circles(N)), assert(number_circles(NC)). 
 
-%Tiles sinked counter
-sink_count(Player) :- sink_streak(Player,Streak), NStreak is Streak+1, retract(sink_streak(_, Streak)), assert(sink_streak(Player,NStreak).
-sink_count(Player) :- sink_streak(OPlayer,_), Player \= OPlayer, retract(sink_streak(_,_)), assert(sink_streak(Player, 1).
+%Tiles sinked counter - used to check win condition
+sink_count(Player) :- sink_streak(Player,Streak), NStreak is Streak+1, retract(sink_streak(_, Streak)), assert(sink_streak(Player,NStreak)).
+sink_count(Player) :- sink_streak(OPlayer,_), Player \= OPlayer, retract(sink_streak(_,_)), assert(sink_streak(Player, 1)).
+
+%Change current Player
+change_player :- retract(current_player('white')), assert(current_player('black')). 
+change_player :- retract(current_player('black')), assert(current_player('white')). 
 
 % Board randomizer
 randomize_board_major :- randomize(N), replace_board(3,2,3,4,N), randomize_board_major_3.
@@ -95,7 +104,7 @@ randomize_board_major_27 :- randomize(N), replace_board(1,2,5,4,N), randomize_bo
 randomize_board_major_29 :- randomize(N), replace_board(1,1,5,5,N), randomize_board_major_31.
 randomize_board_major_31 :- randomize(N), replace_board(0,2,6,4,N), randomize_board_major_33.
 randomize_board_major_33 :- randomize(N), replace_board(0,3,6,3,N), randomize_board_major_35.
-randomize_board_major_35 :- randomize(N), replace_board(0,4,6,2,N), pick_tower.	
+randomize_board_major_35 :- randomize(N), replace_board(0,4,6,2,N).	
 
 randomize_board_minor :- randomize(N), replace_board(2,1,2,3,N), randomize_board_minor_3.
 randomize_board_minor_3 :- randomize(N), replace_board(2,0,2,4,N), randomize_board_minor_5.
@@ -104,7 +113,7 @@ randomize_board_minor_7 :- randomize(N), replace_board(1,1,3,3,N), randomize_boa
 randomize_board_minor_9 :- randomize(N), replace_board(1,2,3,2,N), randomize_board_minor_11.
 randomize_board_minor_11 :- randomize(N), replace_board(1,3,3,1,N), randomize_board_minor_13.
 randomize_board_minor_13 :- randomize(N), replace_board(0,3,4,1,N), randomize_board_minor_15.
-randomize_board_minor_15 :- randomize(N), replace_board(0,2,4,2,N), pick_tower.
+randomize_board_minor_15 :- randomize(N), replace_board(0,2,4,2,N).
 
 % Auxiliary function of the randomizer. 0-BC 1-PC 2-BQ 3-PQ
 replace_board(X1,Y1,X2,Y2,0) :- change_tile(X1,Y1,[' ','B','C']), change_tile(X2,Y2,[' ','P','Q']), add_colour_shape('B', 'C'), add_colour_shape('P', 'Q').
@@ -118,10 +127,14 @@ pick_tower_aux(Character, Number, Tower) :- Tower == 'T', char_code(Character,Ch
 pick_tower :- display_board, write('Player 1: State the vertical coordinate of the first white tower: (Ex: a.)'), read(Character), write('State the horizontal coordinate of the first white tower: (Ex: 1.)'), read(Number), pick_tower_aux(Character, Number, 'L'), pick_tower2.
 pick_tower2 :- display_board, write('Player 1: State the vertical coordinate of the second white tower: (Ex: a.)'), read(Character),  write('State the horizontal coordinate of the second white tower: (Ex: 1.)'), read(Number), pick_tower_aux(Character, Number, 'L'), pick_tower3.
 pick_tower3 :- display_board, write('Player 1: State the vertical coordinate of the first black tower: (Ex: a.)'), read(Character),  write('State the horizontal coordinate of the first black tower: (Ex: 1.)'), read(Number), pick_tower_aux(Character, Number, 'T'), pick_tower4.
-pick_tower4 :- display_board, write('Player 1: State the vertical coordinate of the second black tower: (Ex: a.)'), read(Character),  write('State the horizontal coordinate of the second black tower: (Ex: 1.)'), read(Number), pick_tower_aux(Character, Number, 'T'), pick_colour.
+pick_tower4 :- display_board, write('Player 1: State the vertical coordinate of the second black tower: (Ex: a.)'), read(Character),  write('State the horizontal coordinate of the second black tower: (Ex: 1.)'), read(Number), pick_tower_aux(Character, Number, 'T').
 
 % Player two picks the colour
-pick_colour :- display_board, write('Player 2: Choose your colour. From now on you will be identified with your colour (white/black): '), read(Colour), colour_picked(Colour), make_play.
+pick_colour :- display_board, write('Player 2: Choose your colour. From now on you will be identified with your colour (white/black): '), read(Colour), colour_picked(Colour).
+
+% Game cycle
+
+game_cycle :- repeat, make_play, change_player, check_winning_condition.
 
 % Play time!
 colour_picked('white') :- write('White: Your turn to play\n'), display_board. 
@@ -130,7 +143,7 @@ colour_picked('black') :- write('White: Your turn to play\n'), display_board.
 colour_picked('b') :- write('White: Your turn to play\n'), display_board. 
 
 % Make play
-make_play :- write('Make your move (slide/sink/movetower/pass): '), read(Move), make_play_aux(Move), display_board.
+make_play :- display_board, current_player(Player), write(Player), write(': Your turn to play'), nl, write('Make your move (slide/sink/movetower/pass): '), read(Move), make_play_aux(Move).
 make_play_aux(Move) :- Move == 'sink', sink_tile_aux.
 make_play_aux(Move) :- Move == 'movetower', move_tower_aux.
 make_play_aux(Move) :- Move == 'slide', slide_tile_aux.
@@ -165,7 +178,7 @@ move_tower(X,Y,NX,NY) :- board_cell(X,Y,[Tower|_]), insert_tower(NX, NY, Tower),
 pass.
 
 % Check end game condition
-check_end_game :- sink_streak(Winner, 4), write('\nPlayer '), write(Winner), write(' has won the game!').
+check_winning_condition :- sink_streak(_, 4).
 
 %valid_slide
 %valid_slide(Board,X,Y,NX,NY,Visited) :- X >= 0, Y >= 0, board_size(Board, SizeX, SizeY), X < SizeX, Y < SizeY, \+ member(Element, Visited),
