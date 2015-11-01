@@ -143,4 +143,4 @@ pick_colour(Board) :- display_board(Board), write('Player 2: Choose your colour.
 colour_picked(Board,'white') :- write('White: Your turn to play\n'), display_board(Board). 
 colour_picked(Board,'w') :- write('White: Your turn to play\n'), display_board(Board). 
 colour_picked(Board,'black') :- write('White: Your turn to play\n'), display_board(Board). 
-colour_picked(Board,'b') :- write('White: Your turn to play\n'), display_board(Board). 
+colour_picked(Board,'b') :- write('White: Your turn to play\n'), display_board(Board).  
