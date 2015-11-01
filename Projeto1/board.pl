@@ -147,3 +147,12 @@ pass.
 %valid_slide_aux(Board,X,Y,NX,NY) :- B is Y+1, valid_slide(Board,X,B,NX,NY).
 %valid_slide_aux(Board,X,Y,NX,NY) :- C is X-1, valid_slide(Board,C,Y,NX,NY).
 %valid_slide_aux(Board,X,Y,NX,NY) :- D is Y-1, valid_slide(Board,X,D,NX,NY).
+
+valid_slide(X, Y, FinalX, FinalY) :- board_cell(FinalX, FinalY, [' ',' ',' ']), !, valid_slide_aux(FinalX, FinalY, [[X, Y]], []).
+valid_slide_aux(FinalX, FinalY, [[FinalX, FinalY]|_], _).
+valid_slide_aux(FinalX, FinalY, [Next|T], Visited) :- member(Next, Visited), !, valid_slide_aux(FinalX, FinalY, T, Visited).
+valid_slide_aux(FinalX, FinalY, [[NextX, NextY]| T], Visited) :- \+ member([NextX, NextY], Visited), board_cell(NextX, NextY, [' ',' ',' ']), !,
+	Alt1 is [NextX+1, NextY], Alt2 is [NextX-1, NextY], Alt3 is [NextX, NextY+1], Alt4 is [NextX, NextY-1], append(T, [Alt1, Alt2, Alt3, Alt4], NT)
+	valid_slide_aux(FinalX, FinalY, NT, [[NextX, NextY] | Visited]).
+valid_slide_aux(FinalX, FinalY, [[NextX, NextY]|T], Visited) :- \+ member([NextX,NextY], Visited), \+ board_cell(NextX, NextY, [' ',' ',' ']), !,
+	valid_slide_aux(FinalX, FinalY, T, [[NextX, NextY]|Visited]).
