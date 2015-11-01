@@ -2,17 +2,25 @@
 :- use_module(library(random)).
 :- dynamic board_cell/3.
 :- dynamic board_length/1.
+:- dynamic sink_streak/2.
+:- dynamic current_player/1.
+:- dynamic number_squares/1.
+:- dynamic number_circles/1.
+:- dynamic number_blacks/1.
+:- dynamic number_whites/1.
 
-purge_database(N) :- N > 0, purge_database_aux(0,0), retract(board_length(N)).
+%Database manipulation
+purge_database(N) :- N > 0, purge_database_aux(0,0), retract(board_length(N)), retract(sink_streak(_,_)), retract(current_player(_)), retract(number_circles(_)), retract(number_squares(_)), retract(number_blacks(_)), retract(number_whites(_)).
 purge_database_aux(Row, Col) :- board_length(Length), Row < Length, Col < Length, !, retract(board_cell(Row, Col, _)), NCol is Col + 1, purge_database_aux(Row,NCol).
 purge_database_aux(Row, _) :- board_length(Length), Row < Length, !, NRow is Row + 1, purge_database_aux(NRow, 0).
 purge_database_aux(Row, _) :- board_length(Row).
 
-create_database(N) :- N > 0, assert(board_length(N)), create_database_aux(0, 0).
+create_database(N) :- N > 0, assert(number_squares(0)), assert(number_circles(0)), assert(number_blacks(0)), assert(number_whites(0)), assert(sink_streak('white', 0)), assert(current_player('white')), assert(board_length(N)), create_database_aux(0, 0).
 create_database_aux(Row, Col) :- board_length(Length), Row < Length, Col < Length, !, assert(board_cell(Row, Col, [' ', ' ', ' '])), NCol is Col + 1, create_database_aux(Row,NCol).
 create_database_aux(Row, _) :- board_length(Length), Row < Length, !, NRow is Row + 1, create_database_aux(NRow, 0).
 create_database_aux(Row, _) :- board_length(Row).
 
+%Board display
 display_board :- write_col_coords, display_board_row(0).
 display_board_row(Row) :- board_length(Length), Row < Length, !, write_border, write_line(Row), NRow is Row + 1, display_board_row(NRow).
 display_board_row(Row) :- board_length(Row), !, write_border.
@@ -38,17 +46,32 @@ insert_tower(X,Y,'T') :- board_cell(X,Y,[' ',_,_]), \+ board_cell(X,Y,[_,'B','C'
 remove_tower(X,Y) :- board_cell(X,Y,[_,Colour,Shape]), change_tile(X,Y,[' ', Colour, Shape]).
 
 %Start game
-start_game :- write('Please state the board you want (major/minor): '), read(X), create_board(X).
 start_game :- board_length(Length), purge_database(Length), write('Please state the board you want (major/minor): '), read(X), create_board(X).
+start_game :- write('Please state the board you want (major/minor): '), read(X), create_board(X).
 create_board(minor) :- create_database(5), randomize_board_minor.
 create_board(major) :- create_database(7), randomize_board_major.
 
 %Randomize board
-%NOTA: ISTO NAO ESTA A GERAR A COMBINACAO PQ (numero 3).
-randomize(N) :- random(0,3,N).
+randomize(N) :- random(0,4,N).
+
+%Database modifiers
 
 %Changes a tile's content
 change_tile(X,Y,[Tower,Colour,Shape]) :- retract(board_cell(X,Y,_)), assert(board_cell(X,Y,[Tower,Colour,Shape])).
+
+%Adds a colour/shape to the colour/shape counter
+add_colour_shape(Colour, Shape) :- add_colour(Colour), add_shape(Shape).
+add_colour('B') :- number_whites(N), NW is N+1, retract(number_whites(N)), assert(number_whites(NW)).
+add_colour('P') :- number_blacks(N), NB is N+1, retract(number_blacks(N)), assert(number_blacks(NB)).
+add_shape('Q') :- number_squares(N), NS is N+1, retract(number_squares(N)), assert(number_squares(NS)).
+add_shape('C') :- number_circles(N), NC is N+1, retract(number_circles(N)), assert(number_circles(NC)). 
+
+%Removes a colour/shape to the colour/shape counter
+remove_colour_shape(Colour, Shape) :- remove_colour(Colour), remove_shape(Shape).
+remove_colour('B') :- number_whites(N), NW is N-1, retract(number_whites(N)), assert(number_whites(NW)).
+remove_colour('P') :- number_blacks(N), NB is N-1, retract(number_blacks(N)), assert(number_blacks(NB)).
+remove_shape('Q') :- number_squares(N), NS is N-1, retract(number_squares(N)), assert(number_squares(NS)).
+remove_shape('C') :- number_circles(N), NC is N-1, retract(number_circles(N)), assert(number_circles(NC)). 
 
 % Board randomizer
 randomize_board_major :- randomize(N), replace_board(3,2,3,4,N), randomize_board_major_3.
@@ -68,7 +91,7 @@ randomize_board_major_27 :- randomize(N), replace_board(1,2,5,4,N), randomize_bo
 randomize_board_major_29 :- randomize(N), replace_board(1,1,5,5,N), randomize_board_major_31.
 randomize_board_major_31 :- randomize(N), replace_board(0,2,6,4,N), randomize_board_major_33.
 randomize_board_major_33 :- randomize(N), replace_board(0,3,6,3,N), randomize_board_major_35.
-randomize_board_major_35 :- randomize(N), replace_board(0,4,6,2,N), pick_tower.
+randomize_board_major_35 :- randomize(N), replace_board(0,4,6,2,N), number_squares(S), write('\n'), write(S), write('\n\n'), display_board.	
 
 randomize_board_minor :- randomize(N), replace_board(2,1,2,3,N), randomize_board_minor_3.
 randomize_board_minor_3 :- randomize(N), replace_board(2,0,2,4,N), randomize_board_minor_5.
@@ -77,13 +100,13 @@ randomize_board_minor_7 :- randomize(N), replace_board(1,1,3,3,N), randomize_boa
 randomize_board_minor_9 :- randomize(N), replace_board(1,2,3,2,N), randomize_board_minor_11.
 randomize_board_minor_11 :- randomize(N), replace_board(1,3,3,1,N), randomize_board_minor_13.
 randomize_board_minor_13 :- randomize(N), replace_board(0,3,4,1,N), randomize_board_minor_15.
-randomize_board_minor_15 :- randomize(N), replace_board(0,2,4,2,N), pick_tower.
+randomize_board_minor_15 :- randomize(N), replace_board(0,2,4,2,N), number_squares(S), write('\n'), write(S), write('\n\n'), display_board.
 
 % Auxiliary function of the randomizer. 0-BC 1-PC 2-BQ 3-PQ
-replace_board(X1,Y1,X2,Y2,0) :- change_tile(X1,Y1,[' ','B','C']), change_tile(X2,Y2,[' ','B','C']).
-replace_board(X1,Y1,X2,Y2,1) :- change_tile(X1,Y1,[' ','P','C']), change_tile(X2,Y2,[' ','B','Q']).
-replace_board(X1,Y1,X2,Y2,2) :- change_tile(X1,Y1,[' ','B','Q']), change_tile(X2,Y2,[' ','P','C']).
-replace_board(X1,Y1,X2,Y2,3) :- change_tile(X1,Y1,[' ','P','Q']), change_tile(X2,Y2,[' ','B','C']).
+replace_board(X1,Y1,X2,Y2,0) :- change_tile(X1,Y1,[' ','B','C']), change_tile(X2,Y2,[' ','P','Q']), add_colour_shape('B', 'C'), add_colour_shape('P', 'Q').
+replace_board(X1,Y1,X2,Y2,1) :- change_tile(X1,Y1,[' ','P','C']), change_tile(X2,Y2,[' ','B','Q']), add_colour_shape('B', 'Q'), add_colour_shape('B', 'Q').
+replace_board(X1,Y1,X2,Y2,2) :- change_tile(X1,Y1,[' ','B','Q']), change_tile(X2,Y2,[' ','P','C']), add_colour_shape('P', 'C'), add_colour_shape('P', 'C').
+replace_board(X1,Y1,X2,Y2,3) :- change_tile(X1,Y1,[' ','P','Q']), change_tile(X2,Y2,[' ','B','C']), add_colour_shape('P', 'Q'), add_colour_shape('B', 'C').
 
 % Player 1 picks the towers
 pick_tower_aux(Character, Number, Tower) :- Tower == 'L', char_code(Character,Charcode), write('\n'), Y is Charcode-97, X is Number-1, insert_tower(X, Y, Tower).
@@ -103,7 +126,6 @@ colour_picked('black') :- write('White: Your turn to play\n'), display_board.
 colour_picked('b') :- write('White: Your turn to play\n'), display_board. 
 
 % Make play
-
 make_play :- write('Make your move (slide/remove/movetower/pass): '), read(Move), make_play_aux(Move), display_board.
 make_play_aux(Move) :- Move == 'remove', remove_tile_aux.
 make_play_aux(Move) :- Move == 'movetower', move_tower_aux.
@@ -111,7 +133,6 @@ make_play_aux(Move) :- Move == 'slide', slide_tile_aux.
 make_play_aux(Move) :- Move == 'pass', pass.
 
 % Treat each play individually
-
 slide_tile_aux :- 	write('\nState the vertical coordinate of the tile you want to slide: (Ex: a.)'), read(Character),
 					write('\nState the horizontal coordinate of the tile you want to slide: (Ex: 1.)'), read(Number),
 					write('\nState the vertical coordinate of the tile you want to put the tile in: (Ex: a.)'), read(NCharacter),
@@ -138,6 +159,9 @@ slide_tile(X,Y,NX,NY) :- board_cell(X,Y,Elem), change_tile(NX,NY,Elem), change_t
 remove_tile(X,Y) :- change_tile(X,Y,[' ', ' ', ' ']).
 move_tower(X,Y,NX,NY) :- board_cell(X,Y,[Tower|_]), insert_tower(NX, NY, Tower), remove_tower(X,Y).
 pass.
+
+% Check end game condition
+check_end_game :- sink_streak(Winner, 4).
 
 %valid_slide
 %valid_slide(Board,X,Y,NX,NY,Visited) :- X >= 0, Y >= 0, board_size(Board, SizeX, SizeY), X < SizeX, Y < SizeY, \+ member(Element, Visited),
