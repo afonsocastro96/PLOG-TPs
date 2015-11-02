@@ -134,7 +134,7 @@ pick_colour :- display_board, write('Player 2: Choose your colour. From now on y
 
 % Game cycle
 
-game_cycle :- repeat, make_play, change_player, check_winning_condition.
+game_cycle :- repeat, make_play, change_player, (check_winning_condition).
 
 % Play time!
 colour_picked('white') :- write('White: Your turn to play\n'), display_board. 
