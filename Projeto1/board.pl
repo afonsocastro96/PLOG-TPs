@@ -8,9 +8,12 @@
 :- dynamic number_circles/1.
 :- dynamic number_blacks/1.
 :- dynamic number_whites/1.
+:- dynamic winner/1.
 
 %Database manipulation
-purge_database(N) :- N > 0, purge_database_aux(0,0), retract(board_length(N)), retract(sink_streak(_,_)), retract(current_player(_)), retract(number_circles(_)), retract(number_squares(_)), retract(number_blacks(_)), retract(number_whites(_)).
+purge_database(N) :-	N > 0, purge_database_aux(0,0), retract(board_length(N)), retract(sink_streak(_,_)), retract(current_player(_)),
+						retract(number_circles(_)), retract(number_squares(_)), retract(number_blacks(_)), retract(number_whites(_)),
+						(winner(_) -> retract(winner(_)); true).
 purge_database_aux(Row, Col) :- board_length(Length), Row < Length, Col < Length, !, retract(board_cell(Row, Col, _)), NCol is Col + 1, purge_database_aux(Row,NCol).
 purge_database_aux(Row, _) :- board_length(Length), Row < Length, !, NRow is Row + 1, purge_database_aux(NRow, 0).
 purge_database_aux(Row, _) :- board_length(Row).
@@ -48,7 +51,7 @@ remove_tower(X,Y) :- board_cell(X,Y,[_,Colour,Shape]), change_tile(X,Y,[' ', Col
 %Start game
 start_game :- board_length(Length), purge_database(Length), game. %Esta linha vai ser apagada, so esta aqui para nao ter de fazer isto a toda a hora.
 start_game :- game.
-game :- write('Please state the board you want (major/minor): '), read(X), create_board(X), pick_tower, pick_colour, game_cycle, write('\nPlayer '), current_player(Player), write(Player), write(' has won the game!').
+game :- write('Please state the board you want (major/minor): '), read(X), create_board(X), pick_tower, pick_colour, game_cycle, write('\nPlayer '), winner(Player), write(Player), write(' has won the game!').
 create_board(minor) :- create_database(5), randomize_board_minor.
 create_board(major) :- create_database(7), randomize_board_major.
 
@@ -133,8 +136,7 @@ pick_tower4 :- display_board, write('Player 1: State the vertical coordinate of 
 pick_colour :- display_board, write('Player 2: Choose your colour. From now on you will be identified with your colour (white/black): '), read(Colour), colour_picked(Colour).
 
 % Game cycle
-
-game_cycle :- repeat, make_play, change_player, (check_winning_condition).
+game_cycle :- repeat, once(make_play), once(change_player), check_winning_condition.
 
 % Play time!
 colour_picked('white') :- write('White: Your turn to play\n'), display_board. 
@@ -171,19 +173,35 @@ move_tower_aux :- 	write('\nState the vertical coordinate of the tower you want 
 					char_code(NCharacter,NCharcode), write('\n'), NY is NCharcode-97, NX is NNumber-1,
 					move_tower(X,Y,NX,NY).
 
+
+
+
 % The four possible plays. TODO: Make invalid moves impossible
-slide_tile(X,Y,NX,NY) :- board_cell(X,Y,Elem), change_tile(NX,NY,Elem), change_tile(X,Y,[' ', ' ', ' ']).
+slide_tile(X,Y,NX,NY) :- valid_slide(X,Y,NX,NY), board_cell(X,Y,Elem), change_tile(NX,NY,Elem), change_tile(X,Y,[' ', ' ', ' ']).
 sink_tile(X,Y) :- board_cell(X, Y, [' ',C,S]), !, remove_colour_shape(C,S), change_tile(X,Y,[' ', ' ', ' ']).
-move_tower(X,Y,NX,NY) :- board_cell(X,Y,[Tower|_]), insert_tower(NX, NY, Tower), remove_tower(X,Y).
+move_tower(X,Y,NX,NY) :- valid_move(X,Y,NX,NY), board_cell(X,Y,[Tower|_]), insert_tower(NX, NY, Tower), remove_tower(X,Y).
 pass.
 
+player_tower('white', 'L').
+player_tower('black', 'T').
+
 % Check end game condition
-check_end_game :- sink_streak(Winner, 4), write('\nPlayer '), write(Winner), write(' has won the game!').
+check_winning_condition :- sink_streak(Player, 4), assert(winner(Player)).
+check_winning_condition :- board_cell(X,Y,[_,'P',_]), dark_island(X,Y,Island), number_blacks(N), length(Island, N), assert(winner('black')).
+check_winning_condition :- board_cell(X,Y,[_,'B',_]), white_island(X,Y,Island), number_whites(N), length(Island, N), assert(winner('white')).
+check_winning_condition :- board_cell(X,Y,[_,_,'Q']), square_island(X,Y,Island), number_squares(N), length(Island, N), assert(winner('black')).
+check_winning_condition :- board_cell(X,Y,[_,_,'C']), circle_island(X,Y,Island), number_circles(N), length(Island, N), assert(winner('white')).
 
-check_winning_condition :- sink_streak(_, 4).
 
 
-valid_slide(X, Y, FinalX, FinalY) :- slidable_tiles(X,Y,Tiles), member([FinalX,FinalY], Tiles).
+valid_slide(X, Y, FinalX, FinalY) :- board_cell(X,Y,[Tower,_,_]), current_player(Player), player_tower(Player,Tower),slidable_tiles(X,Y,Tiles), member([FinalX,FinalY], Tiles).
+valid_move(X,Y,NX,NY) :- 	board_cell(X,Y,[Tower,_,_]), current_player(Player), player_tower(Player,Tower),
+							board_cell(NX,NY, [' ',_,_]), valid_move_aux(X,Y,NX,NY).
+
+valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['L','B',_]), light_island(X,Y,Island), member([NX,NY],Island).
+valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['L',_,'C']), circle_island(X,Y,Island), member([NX,NY],Island).
+valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['T','P',_]), black_island(X,Y,Island), member([NX,NY],Island).
+valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['T',_,'Q']), square_island(X,Y,Island), member([NX,NY],Island).
 
 connected_board :- 	board_cell(X, Y, [_, 'P', _]), reachable_tiles(X, Y, Tiles), length(Tiles, L), number_blacks(B), number_whites(W), !, L is B + W.
 
@@ -236,7 +254,27 @@ square_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visi
 	square_island_search(NT, [[X,Y]|Visited], Island).
 square_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,_,'Q']), !,
 	square_island_search(T,[[X,Y]|Visited], Island).
-	
+
+%sinkable tiles
+
+tower('L').
+tower('T').
+tower_positions(Tower, [[X1, Y1], [X2, Y2]]) :-tower(Tower), board_cell(X1,Y1,[Tower,_,_]), board_cell(X2,Y2,[Tower,_,_]), [X1,Y1] \= [X2,Y2].
+
+sinkable_tiles(X,Y,Tiles) :- \+board_cell(X,Y,[' ',_,_]), neighbour_tiles(X,Y,Neighbours), free_edges(Neighbours,Tiles).
+
+free_edges([], []).
+free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- A is X+1, \+board_cell(A,Y,_), !, free_edges(Tiles, MoreTiles).
+free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- B is X-1, \+board_cell(B,Y,_), !,free_edges(Tiles, MoreTiles).
+free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- C is Y+1, \+board_cell(X,C,_), !,free_edges(Tiles, MoreTiles).
+free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- D is X-1, \+board_cell(X,D,_), !,free_edges(Tiles, MoreTiles).
+free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- A is X+1, board_cell(A,Y,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
+free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- B is X-1, board_cell(B,Y,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
+free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- C is Y+1, board_cell(X,C,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
+free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- D is X-1, board_cell(X,D,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
+free_edges([_|Tiles], MoreTiles) :- free_edges(Tiles,MoreTiles).
+
+
 %searching slidable positions
 slidable_tiles(X, Y, Tiles) :- \+ board_cell(X, Y, [' ',_,_]),
 	neighbour_tiles(X,Y,Neighbours), slidable_tiles_search(Neighbours, [[X,Y]], PTiles),
