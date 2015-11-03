@@ -160,7 +160,7 @@ move_tower_aux :- 	write('\nState the vertical coordinate of the tower you want 
 
 % The four possible plays. TODO: Make invalid moves impossible
 slide_tile(X,Y,NX,NY) :- board_cell(X,Y,Elem), change_tile(NX,NY,Elem), change_tile(X,Y,[' ', ' ', ' ']).
-sink_tile(X,Y) :- change_tile(X,Y,[' ', ' ', ' ']).
+sink_tile(X,Y) :- board_cell(X, Y, [' ',C,S]), !, remove_colour_shape(C,S), change_tile(X,Y,[' ', ' ', ' ']).
 move_tower(X,Y,NX,NY) :- board_cell(X,Y,[Tower|_]), insert_tower(NX, NY, Tower), remove_tower(X,Y).
 pass.
 
@@ -198,13 +198,17 @@ reachable_tiles_aux([[X, Y]|T], Visited, [[X, Y]|Reachable]) :- board_cell(X, Y,
 	reachable_tiles_aux(NT, [[X,Y]|Visited], Reachable).
 reachable_tiles_aux([Next|T], Visited, Reachable) :- reachable_tiles_aux(T, [Next|Visited], Reachable).
 
+%neighbour positions
+neighbour_tiles(X, Y, [Alt1, Alt2, Alt3, Alt4]) :- 
+	NX is X + 1, PX is X - 1, NY is Y + 1, PY is Y - 1,
+	Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY].
+
 %searching islands
 dark_island(X, Y, Island) :- dark_island_search([[X,Y]], [], Island).
 dark_island_search([], _, []).
 dark_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, dark_island_search(T,Visited,Island).
 dark_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,'P',_]), !,
-	NX is X + 1, PX is X - 1, NY is Y + 1, PY is Y - 1,
-	Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY], append(T, [Alt1,Alt2,Alt3,Alt4], NT),
+	neighbour_tiles(X,Y,Neighbours), append(T, Neighbours, NT),
 	dark_island_search(NT, [[X,Y]|Visited], Island).
 dark_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,'P',_]), !,
 	dark_island_search(T,[[X,Y]|Visited], Island).
@@ -213,8 +217,7 @@ light_island(X, Y, Island) :- light_island_search([[X,Y]], [], Island).
 light_island_search([], _, []).
 light_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, light_island_search(T,Visited,Island).
 light_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,'B',_]), !,
-	NX is X + 1, PX is X - 1, NY is Y + 1, PY is Y - 1,
-	Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY], append(T, [Alt1,Alt2,Alt3,Alt4], NT),
+	neighbour_tiles(X,Y,Neighbours), append(T, Neighbours, NT),
 	light_island_search(NT, [[X,Y]|Visited], Island).
 light_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,'B',_]), !,
 	light_island_search(T,[[X,Y]|Visited], Island).
@@ -223,8 +226,7 @@ circle_island(X, Y, Island) :- circle_island_search([[X,Y]], [], Island).
 circle_island_search([], _, []).
 circle_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, circle_island_search(T,Visited,Island).
 circle_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,_,'C']), !,
-	NX is X + 1, PX is X - 1, NY is Y + 1, PY is Y - 1,
-	Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY], append(T, [Alt1,Alt2,Alt3,Alt4], NT),
+	neighbour_tiles(X,Y,Neighbours), append(T, Neighbours, NT),
 	circle_island_search(NT, [[X,Y]|Visited], Island).
 circle_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,_,'C']), !,
 	circle_island_search(T,[[X,Y]|Visited], Island).
@@ -233,8 +235,25 @@ square_island(X, Y, Island) :- square_island_search([[X,Y]], [], Island).
 square_island_search([], _, []).
 square_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, square_island_search(T,Visited,Island).
 square_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,_,'Q']), !,
-	NX is X + 1, PX is X - 1, NY is Y + 1, PY is Y - 1,
-	Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY], append(T, [Alt1,Alt2,Alt3,Alt4], NT),
+	neighbour_tiles(X,Y,Neighbours), append(T, Neighbours, NT),
 	square_island_search(NT, [[X,Y]|Visited], Island).
 square_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,_,'Q']), !,
 	square_island_search(T,[[X,Y]|Visited], Island).
+	
+%searching slidable positions
+slidable_tiles(X, Y, Tiles) :- \+ board_cell(X, Y, [' ',_,_]),
+	neighbour_tiles(X,Y,Neighbours), slidable_tiles_search(Neighbours, [[X,Y]], PTiles),
+	slidable_tiles_valid(X, Y, PTiles, Tiles).
+
+slidable_tiles_search([],_,[]).
+slidable_tiles_search([Tile|T], Visited, PTiles) :- member(Tile, Visited), !, slidable_tiles_search(T, Visited, PTiles).
+slidable_tiles_search([[X,Y]|T], Visited, [[X,Y]|PTiles]) :- \+ member([X,Y], Visited), board_cell(X, Y, [' ',' ',' ']), !,
+	neighbour_tiles(X, Y, Neighbours), append(T, Neighbours, NT),
+	slidable_tiles_search(NT, [[X,Y]|Visited], PTiles).
+slidable_tiles_search([[X,Y]|T], Visited, PTiles) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[' ',' ',' ']), !,
+	slidable_tiles_search(T,[[X,Y]|Visited], PTiles).
+
+slidable_tiles_valid(_,_,[], []).
+slidable_tiles_valid(StartX, StartY, [[X,Y]|PTiles],Tiles) :- slidable_tiles_valid(StartX, StartY, PTiles, NTiles),
+	board_cell(StartX,StartY,Cell), change_tile(StartX, StartY, [' ',' ',' ']), change_tile(X,Y,Cell),
+	(connected_board -> append([[X,Y]],NTiles, Tiles); Tiles = NTiles), change_tile(StartX, StartY, Cell), change_tile(X, Y, [' ',' ',' ']). 
