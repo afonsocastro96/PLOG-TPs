@@ -74,8 +74,8 @@ remove_shape('Q') :- number_squares(N), NS is N-1, retract(number_squares(N)), a
 remove_shape('C') :- number_circles(N), NC is N-1, retract(number_circles(N)), assert(number_circles(NC)). 
 
 %Tiles sinked counter
-sink_count(Player) :- sink_streak(Player,Streak), NStreak is Streak+1, retract(sink_streak(_, Streak)), assert(sink_streak(Player,NStreak).
-sink_count(Player) :- sink_streak(OPlayer,_), Player \= OPlayer, retract(sink_streak(_,_)), assert(sink_streak(Player, 1).
+sink_count(Player) :- sink_streak(Player,Streak), NStreak is Streak+1, retract(sink_streak(_, Streak)), assert(sink_streak(Player,NStreak)).
+sink_count(Player) :- sink_streak(OPlayer,_), Player \= OPlayer, retract(sink_streak(_,_)), assert(sink_streak(Player, 1)).
 
 % Board randomizer
 randomize_board_major :- randomize(N), replace_board(3,2,3,4,N), randomize_board_major_3.
@@ -197,3 +197,44 @@ reachable_tiles_aux([[X, Y]|T], Visited, [[X, Y]|Reachable]) :- board_cell(X, Y,
 	Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY], append(T, [Alt1, Alt2, Alt3, Alt4], NT),
 	reachable_tiles_aux(NT, [[X,Y]|Visited], Reachable).
 reachable_tiles_aux([Next|T], Visited, Reachable) :- reachable_tiles_aux(T, [Next|Visited], Reachable).
+
+%searching islands
+dark_island(X, Y, Island) :- dark_island_search([[X,Y]], [], Island).
+dark_island_search([], _, []).
+dark_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, dark_island_search(T,Visited,Island).
+dark_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,'P',_]), !,
+	NX is X + 1, PX is X - 1, NY is Y + 1, PY is Y - 1,
+	Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY], append(T, [Alt1,Alt2,Alt3,Alt4], NT),
+	dark_island_search(NT, [[X,Y]|Visited], Island).
+dark_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,'P',_]), !,
+	dark_island_search(T,[[X,Y]|Visited], Island).
+	
+light_island(X, Y, Island) :- light_island_search([[X,Y]], [], Island).
+light_island_search([], _, []).
+light_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, light_island_search(T,Visited,Island).
+light_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,'B',_]), !,
+	NX is X + 1, PX is X - 1, NY is Y + 1, PY is Y - 1,
+	Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY], append(T, [Alt1,Alt2,Alt3,Alt4], NT),
+	light_island_search(NT, [[X,Y]|Visited], Island).
+light_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,'B',_]), !,
+	light_island_search(T,[[X,Y]|Visited], Island).
+
+circle_island(X, Y, Island) :- circle_island_search([[X,Y]], [], Island).
+circle_island_search([], _, []).
+circle_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, circle_island_search(T,Visited,Island).
+circle_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,_,'C']), !,
+	NX is X + 1, PX is X - 1, NY is Y + 1, PY is Y - 1,
+	Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY], append(T, [Alt1,Alt2,Alt3,Alt4], NT),
+	circle_island_search(NT, [[X,Y]|Visited], Island).
+circle_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,_,'C']), !,
+	circle_island_search(T,[[X,Y]|Visited], Island).
+	
+square_island(X, Y, Island) :- square_island_search([[X,Y]], [], Island).
+square_island_search([], _, []).
+square_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, square_island_search(T,Visited,Island).
+square_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,_,'Q']), !,
+	NX is X + 1, PX is X - 1, NY is Y + 1, PY is Y - 1,
+	Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY], append(T, [Alt1,Alt2,Alt3,Alt4], NT),
+	square_island_search(NT, [[X,Y]|Visited], Island).
+square_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,_,'Q']), !,
+	square_island_search(T,[[X,Y]|Visited], Island).
