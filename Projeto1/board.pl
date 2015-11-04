@@ -65,7 +65,9 @@ Database modifiers
 *****************/
 
 %Changes a tile's content
+add_tile(X,Y,[Tower,Colour, Shape]) :- board_cell(X,Y,[' ',' ',' ']), change_tile(X, Y, [Tower,Colour,Shape]), add_colour_shape(Colour, Shape).
 change_tile(X,Y,[Tower,Colour,Shape]) :- retract(board_cell(X,Y,_)), assert(board_cell(X,Y,[Tower,Colour,Shape])).
+remove_tile(X, Y) :- board_cell(X, Y, [_,Colour,Shape]), change_tile(X,Y,[' ',' ',' ']), remove_colour_shape(Colour, Shape).
 
 %Adds a colour/shape to the colour/shape counter
 add_colour_shape(Colour, Shape) :- add_colour(Colour), add_shape(Shape).
@@ -263,7 +265,7 @@ square_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \
 
 tower('L').
 tower('T').
-tower_positions(Tower, [[X1, Y1], [X2, Y2]]) :-tower(Tower), board_cell(X1,Y1,[Tower,_,_]), board_cell(X2,Y2,[Tower,_,_]), [X1,Y1] \= [X2,Y2].
+tower_positions(Tower, [[X1, Y1], [X2, Y2]]) :- tower(Tower), board_cell(X1,Y1,[Tower,_,_]), board_cell(X2,Y2,[Tower,_,_]), [X1,Y1] \= [X2,Y2].
 
 sinkable_tiles(X,Y,Tiles) :- \+board_cell(X,Y,[' ',_,_]), !, neighbour_tiles(X,Y,Neighbours), free_edges(Neighbours,FreeEdges),
 	empty_tiles(FreeEdges, EmptyTiles), sinkable_tiles_valid(EmptyTiles, Tiles).
@@ -288,9 +290,8 @@ empty_tiles([[X,Y]|Tiles], EmptyTiles) :- \+ board_cell(X, Y, [' ', _, _]), !, e
 
 %% change colour and shape counts
 sinkable_tiles_valid([],[]).
-sinkable_tiles_valid([[X,Y]|Tiles],ValidTiles) :- sinkable_tiles_valid(Tiles, VTiles), board_cell(X,Y,Cell), change_tile(X,Y,[' ',' ',' ']),
-	(connected_board -> ValidTiles = [[X,Y]|VTiles]; ValidTiles = VTiles), change_tile(X, Y, Cell).
-
+sinkable_tiles_valid([[X,Y]|Tiles],ValidTiles) :- sinkable_tiles_valid(Tiles, VTiles), board_cell(X,Y,Cell), remove_tile(X, Y),
+	(connected_board -> ValidTiles = [[X,Y]|VTiles]; ValidTiles = VTiles), add_tile(X, Y, Cell).
 
 %searching slidable positions
 slidable_tiles(X, Y, Tiles) :- \+ board_cell(X, Y, [' ',_,_]),
@@ -307,25 +308,35 @@ slidable_tiles_search([[X,Y]|T], Visited, PTiles) :- \+ member([X,Y], Visited), 
 
 slidable_tiles_valid(_,_,[], []).
 slidable_tiles_valid(StartX, StartY, [[X,Y]|PTiles],Tiles) :- slidable_tiles_valid(StartX, StartY, PTiles, NTiles),
-	board_cell(StartX,StartY,Cell), change_tile(StartX, StartY, [' ',' ',' ']), change_tile(X,Y,Cell),
-	(connected_board -> Tiles = [[X,Y]|NTiles]; Tiles = NTiles), change_tile(StartX, StartY, Cell), change_tile(X, Y, [' ',' ',' ']). 
+	board_cell(StartX,StartY,Cell), remove_tile(StartX, StartY), add_tile(X,Y,Cell),
+	(connected_board -> Tiles = [[X,Y]|NTiles]; Tiles = NTiles), add_tile(StartX, StartY, Cell), remove_tile(X, Y). 
 	
 within_board_limits(X, Y) :- board_limits(MinX, MaxX, MinY, MaxY), X >= MinX, X =< MaxX, Y >= MinY, Y =< MaxY.
-	
+
+tiles_in_X(X, Tiles) :- var(Tiles), tiles_in_X_aux(X, 0, Tiles).
+tiles_in_X_aux(_, Y, []) :- board_length(Y).
+tiles_in_X_aux(X, Y, [[X,Y]|Tiles]) :- board_cell(X, Y, [_,Colour,_]), Colour \= ' ', !, NY is Y + 1, tiles_in_X_aux(X,NY, Tiles).
+tiles_in_X_aux(X, Y, Tiles) :- NY is Y + 1, tiles_in_X_aux(X, NY,Tiles).
+
+tiles_in_Y(Y, Tiles) :- var(Tiles), tiles_in_Y_aux(0, Y, Tiles).
+tiles_in_Y_aux(X, _, []) :- board_length(X).
+tiles_in_Y_aux(X, Y, [[X,Y]|Tiles]) :- board_cell(X, Y, [_,Colour,_]), Colour \= ' ', !, NX is X + 1, tiles_in_Y_aux(NX,Y, Tiles).
+tiles_in_Y_aux(X, Y, Tiles) :- NX is X + 1, tiles_in_Y_aux(NX, Y,Tiles).
+
 board_limits(MinX, MaxX, MinY, MaxY) :- min_x(MinX), max_x(MaxX), min_y(MinY), max_y(MaxY).
 min_x(MinX) :- min_x_aux(0, MinX).
-min_x_aux(X, MinX) :- board_cell(X,_,[_,Colour,_]), Colour \= ' ', !, NX is X + 1, min_x_aux(NX, MinX).
-min_x_aux(X, X).
+min_x_aux(X, MinX) :- once(tiles_in_X(X, Tiles)), Tiles = [], !,NX is X + 1, min_x_aux(NX, MinX).
+min_x_aux(X, MinX) :- var(MinX), MinX = X.
 
 max_x(MaxX) :- board_length(Length), X is Length - 1, max_x_aux(X,MaxX).
-max_x_aux(X, MaxX) :- board_cell(X,_,[_,Colour,_]), Colour \= ' ', !, PX is X - 1, max_x_aux(PX, MaxX).
-max_x_aux(X, X).
+max_x_aux(X, MaxX) :- once(tiles_in_X(X, Tiles)), Tiles = [], !, PX is X - 1, max_x_aux(PX, MaxX).
+max_x_aux(X, MaxX) :- var(MaxX), MaxX = X.
 
 min_y(MinY) :- min_y_aux(0, MinY).
-min_y_aux(Y, MinY) :- board_cell(_,Y,[_,Colour,_]), Colour \= ' ', !, NY is Y + 1, min_y_aux(NY, MinY).
-min_y_aux(Y, Y).
+min_y_aux(Y, MinY) :- once(tiles_in_Y(Y, Tiles)), Tiles = [], !, NY is Y + 1, min_y_aux(NY, MinY).
+min_y_aux(Y, MinY) :- var(MinY), MinY = Y.
 
 
 max_y(MaxY) :- board_length(Length), Y is Length - 1, max_y_aux(Y,MaxY).
-max_y_aux(Y, MaxY) :- board_cell(_,Y,[_,Colour,_]), Colour \= ' ', !, PY is Y - 1, max_y_aux(PY, MaxY).
-max_y_aux(Y, Y).
+max_y_aux(Y, MaxY) :- once(tiles_in_Y(Y, Tiles)), Tiles = [], !, PY is Y - 1, max_y_aux(PY, MaxY).
+max_y_aux(Y, MaxY) :- var(MaxY), MaxY = Y.
