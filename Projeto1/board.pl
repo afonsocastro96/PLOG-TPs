@@ -8,17 +8,21 @@
 :- dynamic number_circles/1.
 :- dynamic number_blacks/1.
 :- dynamic number_whites/1.
+:- dynamic number_pass/2.
 :- dynamic winner/1.
 
 %Database manipulation
 purge_database(N) :-	N > 0, purge_database_aux(0,0), retract(board_length(N)), retract(sink_streak(_,_)), retract(current_player(_)),
 						retract(number_circles(_)), retract(number_squares(_)), retract(number_blacks(_)), retract(number_whites(_)),
+						retract(number_pass('white',_)), retract(number_pass('black',_)),
 						(winner(_) -> retract(winner(_)); true).
 purge_database_aux(Row, Col) :- board_length(Length), Row < Length, Col < Length, !, retract(board_cell(Row, Col, _)), NCol is Col + 1, purge_database_aux(Row,NCol).
 purge_database_aux(Row, _) :- board_length(Length), Row < Length, !, NRow is Row + 1, purge_database_aux(NRow, 0).
 purge_database_aux(Row, _) :- board_length(Row).
 
-create_database(N) :- N > 0, assert(number_squares(0)), assert(number_circles(0)), assert(number_blacks(0)), assert(number_whites(0)), assert(sink_streak('white', 0)), assert(current_player('white')), assert(board_length(N)), create_database_aux(0, 0).
+create_database(N) :- 	N > 0, assert(number_squares(0)), assert(number_circles(0)), assert(number_blacks(0)), assert(number_whites(0)),
+						assert(sink_streak('white', 0)), assert(current_player('white')), assert(number_pass('white', 0)), assert(number_pass('black', 0)),
+						assert(board_length(N)), create_database_aux(0, 0).
 create_database_aux(Row, Col) :- board_length(Length), Row < Length, Col < Length, !, assert(board_cell(Row, Col, [' ', ' ', ' '])), NCol is Col + 1, create_database_aux(Row,NCol).
 create_database_aux(Row, _) :- board_length(Length), Row < Length, !, NRow is Row + 1, create_database_aux(NRow, 0).
 create_database_aux(Row, _) :- board_length(Row).
@@ -91,6 +95,10 @@ sink_count(Player) :- sink_streak(OPlayer,_), Player \= OPlayer, retract(sink_st
 change_player :- retract(current_player('white')), assert(current_player('black')). 
 change_player :- retract(current_player('black')), assert(current_player('white')). 
 
+%Change pass
+increment_pass(Player) :- retract(number_pass(Player, Pass)), NPass is Pass + 1, assert(number_pass(Player, NPass)).
+reset_pass(Player) :- retract(number_pass(Player, _)), assert(number_pass(Player, 0)).
+
 % Board randomizer
 randomize_board_major :- randomize(N), replace_board(3,2,3,4,N), randomize_board_major_3.
 randomize_board_major_3 :- randomize(N), replace_board(3,1,3,5,N), randomize_board_major_5.
@@ -160,12 +168,12 @@ slide_tile_aux :- 	write('\nState the vertical coordinate of the tile you want t
 					write('\nState the horizontal coordinate of the tile you want to put the tile in: (Ex: 1.)'), read(NNumber),
 					char_code(Character,Charcode), write('\n'), Y is Charcode-97, X is Number-1, % <--- TODO: Fazer desta linha uma funcao e usar na pick_tower e nas 3 jogadas
 					char_code(NCharacter,NCharcode), write('\n'), NY is NCharcode-97, NX is NNumber-1,
-					slide_tile(X,Y,NX,NY).
+					slide_tile(X,Y,NX,NY), current_player(Player), reset_pass(Player).
 
 sink_tile_aux :-	write('\nState the vertical coordinate of the tile you want to remove: (Ex: a.)'), read(Character),
 					write('\nState the horizontal coordinate of the tile you want to remove: (Ex: 1.)'), read(Number),
 					char_code(Character,Charcode), write('\n'), Y is Charcode-97, X is Number-1,
-					sink_tile(X,Y).
+					sink_tile(X,Y), current_player(Player), reset_pass(Player).
 
 move_tower_aux :- 	write('\nState the vertical coordinate of the tower you want to move: (Ex: a.)'), read(Character),
 					write('\nState the horizontal coordinate of the tower you want to move: (Ex: 1.)'), read(Number),
@@ -173,7 +181,7 @@ move_tower_aux :- 	write('\nState the vertical coordinate of the tower you want 
 					write('\nState the horizontal coordinate of the tower you want to move the tile to: (Ex: 1.)'), read(NNumber),
 					char_code(Character,Charcode), write('\n'), Y is Charcode-97, X is Number-1, % <--- TODO: Fazer desta linha uma funcao e usar na pick_tower e nas 3 jogadas
 					char_code(NCharacter,NCharcode), write('\n'), NY is NCharcode-97, NX is NNumber-1,
-					move_tower(X,Y,NX,NY).
+					move_tower(X,Y,NX,NY), current_player(Player), reset_pass(Player).
 
 
 
@@ -182,19 +190,29 @@ move_tower_aux :- 	write('\nState the vertical coordinate of the tower you want 
 slide_tile(X,Y,NX,NY) :- valid_slide(X,Y,NX,NY), board_cell(X,Y,Elem), change_tile(NX,NY,Elem), change_tile(X,Y,[' ', ' ', ' ']).
 sink_tile(X,Y) :- board_cell(X, Y, [' ',C,S]), !, remove_colour_shape(C,S), change_tile(X,Y,[' ', ' ', ' ']).
 move_tower(X,Y,NX,NY) :- valid_move(X,Y,NX,NY), board_cell(X,Y,[Tower|_]), insert_tower(NX, NY, Tower), remove_tower(X,Y).
-pass.
+pass :- current_player(Player), increment_pass(Player).
 
 player_tower('white', 'L').
 player_tower('black', 'T').
 
 % Check end game condition
 check_winning_condition :- sink_streak(Player, 4), assert(winner(Player)).
-check_winning_condition :- board_cell(X,Y,[_,'P',_]), dark_island(X,Y,Island), number_blacks(N), length(Island, N), assert(winner('black')).
-check_winning_condition :- board_cell(X,Y,[_,'B',_]), light_island(X,Y,Island), number_whites(N), length(Island, N), assert(winner('white')).
-check_winning_condition :- board_cell(X,Y,[_,_,'Q']), square_island(X,Y,Island), number_squares(N), length(Island, N), assert(winner('black')).
-check_winning_condition :- board_cell(X,Y,[_,_,'C']), circle_island(X,Y,Island), number_circles(N), length(Island, N), assert(winner('white')).
+check_winning_condition :- completed_island(Player1), completed_island(Player2), Player1 \= Player2, !, resolve_initiative(Winner), assert(winner(Winner)).
+check_winning_condition :- completed_island(Player), !, assert(winner(Player)).
+check_winning_condition :- number_pass(Player1, 1), number_pass(Player2, 1), Player1 \= Player2, !, resolve_initiative(Winner), assert(winner(Winner)).
+check_winning_condition :- number_pass(_, 4), number_pass(Winner, 0), !, assert(winner(Winner)). 
 
+completed_island('white') :- completed_light_island.
+completed_island('white') :- completed_circle_island.
+completed_island('black') :- completed_dark_island.
+completed_island('black') :- completed_square_island.
 
+resolve_initiative(Winner) :- sink_streak(Winner,_).
+
+completed_dark_island :- board_cell(X,Y,[_,'P',_]), dark_island(X,Y,Island), number_blacks(N), length(Island, N).
+completed_light_island :- board_cell(X,Y,[_,'B',_]), light_island(X,Y,Island), number_whites(N), length(Island, N).
+completed_square_island :- board_cell(X,Y,[_,_,'Q']), square_island(X,Y,Island), number_squares(N), length(Island, N).
+completed_circle_island :- board_cell(X,Y,[_,_,'C']), circle_island(X,Y,Island), number_circles(N), length(Island, N).
 
 valid_slide(X, Y, FinalX, FinalY) :- board_cell(X,Y,[Tower,_,_]), current_player(Player), player_tower(Player,Tower),slidable_tiles(X,Y,Tiles), member([FinalX,FinalY], Tiles).
 valid_move(X,Y,NX,NY) :- 	board_cell(X,Y,[Tower,_,_]), current_player(Player), player_tower(Player,Tower),
