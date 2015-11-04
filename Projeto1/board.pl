@@ -188,7 +188,7 @@ player_tower('black', 'T').
 % Check end game condition
 check_winning_condition :- sink_streak(Player, 4), assert(winner(Player)).
 check_winning_condition :- board_cell(X,Y,[_,'P',_]), dark_island(X,Y,Island), number_blacks(N), length(Island, N), assert(winner('black')).
-check_winning_condition :- board_cell(X,Y,[_,'B',_]), white_island(X,Y,Island), number_whites(N), length(Island, N), assert(winner('white')).
+check_winning_condition :- board_cell(X,Y,[_,'B',_]), light_island(X,Y,Island), number_whites(N), length(Island, N), assert(winner('white')).
 check_winning_condition :- board_cell(X,Y,[_,_,'Q']), square_island(X,Y,Island), number_squares(N), length(Island, N), assert(winner('black')).
 check_winning_condition :- board_cell(X,Y,[_,_,'C']), circle_island(X,Y,Island), number_circles(N), length(Island, N), assert(winner('white')).
 
@@ -202,6 +202,10 @@ valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['L','B',_]), light_island(X,Y,Islan
 valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['L',_,'C']), circle_island(X,Y,Island), member([NX,NY],Island).
 valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['T','P',_]), black_island(X,Y,Island), member([NX,NY],Island).
 valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['T',_,'Q']), square_island(X,Y,Island), member([NX,NY],Island).
+
+valid_sink(X, Y) :- current_player(Player), player_tower(Player, Tower), tower_positions(Tower, [[X1, Y1], [X2, Y2]]),
+					sinkable_tiles(X1, Y1, Tiles1), sinkable_tiles(X2, Y2, Tiles2), append(Tiles1, Tiles2, Sinkable),
+					member([X,Y], Sinkable).
 
 connected_board :- 	board_cell(X, Y, [_, 'P', _]), reachable_tiles(X, Y, Tiles), length(Tiles, L), number_blacks(B), number_whites(W), !, L is B + W.
 
@@ -261,9 +265,12 @@ tower('L').
 tower('T').
 tower_positions(Tower, [[X1, Y1], [X2, Y2]]) :-tower(Tower), board_cell(X1,Y1,[Tower,_,_]), board_cell(X2,Y2,[Tower,_,_]), [X1,Y1] \= [X2,Y2].
 
-sinkable_tiles(X,Y,Tiles) :- \+board_cell(X,Y,[' ',_,_]), neighbour_tiles(X,Y,Neighbours), free_edges(Neighbours,Tiles).
+sinkable_tiles(X,Y,Tiles) :- \+board_cell(X,Y,[' ',_,_]), !, neighbour_tiles(X,Y,Neighbours), free_edges(Neighbours,FreeEdges),
+	empty_tiles(FreeEdges, EmptyTiles), sinkable_tiles_valid(EmptyTiles, Tiles).
+sinkable_tiles(_,_,[]).
 
 free_edges([], []).
+free_edges([[X,Y]|Tiles], MoreTiles) :- \+board_cell(X,Y,_), free_edges(Tiles, MoreTiles).
 free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- A is X+1, \+board_cell(A,Y,_), !, free_edges(Tiles, MoreTiles).
 free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- B is X-1, \+board_cell(B,Y,_), !,free_edges(Tiles, MoreTiles).
 free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- C is Y+1, \+board_cell(X,C,_), !,free_edges(Tiles, MoreTiles).
@@ -274,6 +281,16 @@ free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- C is Y+1, board_cell(X,C,[' ',' 
 free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- D is X-1, board_cell(X,D,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
 free_edges([_|Tiles], MoreTiles) :- free_edges(Tiles,MoreTiles).
 
+empty_tiles([],[]).
+empty_tiles([[X,Y]|Tiles], EmptyTiles) :- board_cell(X, Y, [' ',' ',' ']), !, empty_tiles(Tiles, EmptyTiles).
+empty_tiles([[X,Y]|Tiles], [[X,Y]|EmptyTiles]) :- board_cell(X, Y, [' ', _, _]), !, empty_tiles(Tiles, EmptyTiles).
+empty_tiles([[X,Y]|Tiles], EmptyTiles) :- \+ board_cell(X, Y, [' ', _, _]), !, empty_tiles(Tiles, EmptyTiles).
+
+%% change colour and shape counts
+sinkable_tiles_valid([],[]).
+sinkable_tiles_valid([[X,Y]|Tiles],ValidTiles) :- sinkable_tiles_valid(Tiles, VTiles), board_cell(X,Y,Cell), change_tile(X,Y,[' ',' ',' ']),
+	(connected_board -> ValidTiles = [[X,Y]|VTiles]; ValidTiles = VTiles), change_tile(X, Y, Cell).
+
 
 %searching slidable positions
 slidable_tiles(X, Y, Tiles) :- \+ board_cell(X, Y, [' ',_,_]),
@@ -282,13 +299,33 @@ slidable_tiles(X, Y, Tiles) :- \+ board_cell(X, Y, [' ',_,_]),
 
 slidable_tiles_search([],_,[]).
 slidable_tiles_search([Tile|T], Visited, PTiles) :- member(Tile, Visited), !, slidable_tiles_search(T, Visited, PTiles).
-slidable_tiles_search([[X,Y]|T], Visited, [[X,Y]|PTiles]) :- \+ member([X,Y], Visited), board_cell(X, Y, [' ',' ',' ']), !,
+slidable_tiles_search([[X,Y]|T], Visited, [[X,Y]|PTiles]) :- \+ member([X,Y], Visited), board_cell(X, Y, [' ',' ',' ']), within_board_limits(X,Y), !,
 	neighbour_tiles(X, Y, Neighbours), append(T, Neighbours, NT),
 	slidable_tiles_search(NT, [[X,Y]|Visited], PTiles).
-slidable_tiles_search([[X,Y]|T], Visited, PTiles) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[' ',' ',' ']), !,
+slidable_tiles_search([[X,Y]|T], Visited, PTiles) :- \+ member([X,Y], Visited), !,
 	slidable_tiles_search(T,[[X,Y]|Visited], PTiles).
 
 slidable_tiles_valid(_,_,[], []).
 slidable_tiles_valid(StartX, StartY, [[X,Y]|PTiles],Tiles) :- slidable_tiles_valid(StartX, StartY, PTiles, NTiles),
 	board_cell(StartX,StartY,Cell), change_tile(StartX, StartY, [' ',' ',' ']), change_tile(X,Y,Cell),
-	(connected_board -> append([[X,Y]],NTiles, Tiles); Tiles = NTiles), change_tile(StartX, StartY, Cell), change_tile(X, Y, [' ',' ',' ']). 
+	(connected_board -> Tiles = [[X,Y]|NTiles]; Tiles = NTiles), change_tile(StartX, StartY, Cell), change_tile(X, Y, [' ',' ',' ']). 
+	
+within_board_limits(X, Y) :- board_limits(MinX, MaxX, MinY, MaxY), X >= MinX, X =< MaxX, Y >= MinY, Y =< MaxY.
+	
+board_limits(MinX, MaxX, MinY, MaxY) :- min_x(MinX), max_x(MaxX), min_y(MinY), max_y(MaxY).
+min_x(MinX) :- min_x_aux(0, MinX).
+min_x_aux(X, MinX) :- board_cell(X,_,[_,Colour,_]), Colour \= ' ', !, NX is X + 1, min_x_aux(NX, MinX).
+min_x_aux(X, X).
+
+max_x(MaxX) :- board_length(Length), X is Length - 1, max_x_aux(X,MaxX).
+max_x_aux(X, MaxX) :- board_cell(X,_,[_,Colour,_]), Colour \= ' ', !, PX is X - 1, max_x_aux(PX, MaxX).
+max_x_aux(X, X).
+
+min_y(MinY) :- min_y_aux(0, MinY).
+min_y_aux(Y, MinY) :- board_cell(_,Y,[_,Colour,_]), Colour \= ' ', !, NY is Y + 1, min_y_aux(NY, MinY).
+min_y_aux(Y, Y).
+
+
+max_y(MaxY) :- board_length(Length), Y is Length - 1, max_y_aux(Y,MaxY).
+max_y_aux(Y, MaxY) :- board_cell(_,Y,[_,Colour,_]), Colour \= ' ', !, PY is Y - 1, max_y_aux(PY, MaxY).
+max_y_aux(Y, Y).
