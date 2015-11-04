@@ -216,7 +216,7 @@ completed_circle_island :- board_cell(X,Y,[_,_,'C']), circle_island(X,Y,Island),
 
 valid_slide(X, Y, FinalX, FinalY) :- board_cell(X,Y,[Tower,_,_]), current_player(Player), player_tower(Player,Tower),slidable_tiles(X,Y,Tiles), member([FinalX,FinalY], Tiles).
 valid_move(X,Y,NX,NY) :- 	board_cell(X,Y,[Tower,_,_]), current_player(Player), player_tower(Player,Tower),
-							board_cell(NX,NY, [' ',_,_]), valid_move_aux(X,Y,NX,NY).
+							board_cell(NX,NY, [' ',_,_]), [X, Y] \= [NX, NY], valid_move_aux(X,Y,NX,NY).
 
 valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['L','B',_]), light_island(X,Y,Island), member([NX,NY],Island).
 valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['L',_,'C']), circle_island(X,Y,Island), member([NX,NY],Island).
@@ -243,7 +243,8 @@ neighbour_tiles(X, Y, [Alt1, Alt2, Alt3, Alt4]) :-
 	Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY].
 
 %searching islands
-dark_island(X, Y, Island) :- board_cell(X,Y,[_,'P',_]), dark_island_search([[X,Y]], [], Island).
+dark_island(X, Y, Island) :- board_cell(X,Y,[_,'P',_]), !, dark_island_search([[X,Y]], [], Island).
+dark_island(X, Y, []) :- \+ board_cell(X,Y,[_,'P',_]), !.
 dark_island_search([], _, []).
 dark_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, dark_island_search(T,Visited,Island).
 dark_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,'P',_]), !,
@@ -252,7 +253,8 @@ dark_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visite
 dark_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,'P',_]), !,
 	dark_island_search(T,[[X,Y]|Visited], Island).
 	
-light_island(X, Y, Island) :- board_cell(X,Y,[_,'B',_]), light_island_search([[X,Y]], [], Island).
+light_island(X, Y, Island) :- board_cell(X,Y,[_,'B',_]), !, light_island_search([[X,Y]], [], Island).
+light_island(X, Y, []) :- \+ board_cell(X,Y,[_,'B',_]), !.
 light_island_search([], _, []).
 light_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, light_island_search(T,Visited,Island).
 light_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,'B',_]), !,
@@ -261,7 +263,8 @@ light_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visit
 light_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,'B',_]), !,
 	light_island_search(T,[[X,Y]|Visited], Island).
 
-circle_island(X, Y, Island) :- board_cell(X,Y,[_,_,'C']), circle_island_search([[X,Y]], [], Island).
+circle_island(X, Y, Island) :- board_cell(X,Y,[_,_,'C']), !, circle_island_search([[X,Y]], [], Island).
+circle_island(X, Y, []) :- \+ board_cell(X,Y,[_,_,'C']), !.
 circle_island_search([], _, []).
 circle_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, circle_island_search(T,Visited,Island).
 circle_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,_,'C']), !,
@@ -270,7 +273,8 @@ circle_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visi
 circle_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,_,'C']), !,
 	circle_island_search(T,[[X,Y]|Visited], Island).
 	
-square_island(X, Y, Island) :- board_cell(X,Y,[_,_,'Q']), square_island_search([[X,Y]], [], Island).
+square_island(X, Y, Island) :- board_cell(X,Y,[_,_,'Q']), !, square_island_search([[X,Y]], [], Island).
+square_island(X, Y, []) :- \+ board_cell(X,Y,[_,_,'Q']), !.
 square_island_search([], _, []).
 square_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, square_island_search(T,Visited,Island).
 square_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,_,'Q']), !,
@@ -358,3 +362,44 @@ min_y_aux(Y, MinY) :- var(MinY), MinY = Y.
 max_y(MaxY) :- board_length(Length), Y is Length - 1, max_y_aux(Y,MaxY).
 max_y_aux(Y, MaxY) :- once(tiles_in_Y(Y, Tiles)), Tiles = [], !, PY is Y - 1, max_y_aux(PY, MaxY).
 max_y_aux(Y, MaxY) :- var(MaxY), MaxY = Y.
+
+
+
+
+available_actions(Player, Actions) :-	pass_actions(Player, PassActions), move_actions(Player, MoveActions),
+										slide_actions(Player, SlideActions), sink_actions(Player, SinkActions),
+										append(PassActions, MoveActions, L1), append(L1, SlideActions, L2),
+										append(L2, SinkActions, Actions).
+
+pass_actions(_, [['pass']]).
+
+move_actions('white', MoveActions) :- 	player_tower('white', Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
+										light_island(X1,Y1,LightIsland1), circle_island(X1,Y1,CircleIsland1),
+										append(LightIsland1, CircleIsland1, Island1), list_moves(X1, Y1, Island1, MoveActions1),
+										light_island(X2,Y2,LightIsland2), circle_island(X2,Y2,CircleIsland2),
+										append(LightIsland2, CircleIsland2, Island2), list_moves(X2, Y2, Island2, MoveActions2),
+										append(MoveActions1, MoveActions2, MoveActions).
+move_actions('black', MoveActions) :- 	player_tower('black', Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
+										dark_island(X1,Y1,DarkIsland1), square_island(X1,Y1,SquareIsland1),
+										append(DarkIsland1, SquareIsland1, Island1), list_moves(X1, Y1, Island1, MoveActions1),
+										dark_island(X2,Y2,DarkIsland2), square_island(X2,Y2,SquareIsland2),
+										append(DarkIsland2, SquareIsland2, Island2), list_moves(X2, Y2, Island2, MoveActions2),
+										append(MoveActions1, MoveActions2, MoveActions).
+list_moves(_, _, [], []).
+list_moves(StartX, StartY, [[StartX, StartY]|EndList], MoveList) :- !, list_moves(StartX, StartY, EndList, MoveList).
+list_moves(StartX, StartY, [[X, Y]|EndList], [['move',StartX,StartY,X,Y]|MoveList]) :- 	[StartX, StartY] \= [X, Y], !,
+																						list_moves(StartX, StartY, EndList, MoveList).
+
+slide_actions(Player, SlideActions) :-  player_tower(Player, Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
+										slidable_tiles(X1,Y1,Slides1), list_slides(X1, Y1, Slides1, SlideActions1),
+										slidable_tiles(X2,Y2,Slides2), list_slides(X2, Y2, Slides2, SlideActions2),
+										append(SlideActions1, SlideActions2, SlideActions).
+list_slides(_, _, [], []).
+list_slides(StartX, StartY, [[X,Y]|EndList], [['slide',StartX, StartY, X, Y]|SlideList]) :- list_slides(StartX, StartY, EndList, SlideList).
+
+sink_actions(Player, SinkActions) :- 	player_tower(Player, Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
+										sinkable_tiles(X1, Y1, Sinks1), list_sinks(Sinks1, SinkActions1),
+										sinkable_tiles(X2, Y2, Sinks2), list_sinks(Sinks2, SinkActions2),
+										append(SinkActions1, SinkActions2, SinkActions).
+list_sinks([],[]).
+list_sinks([[X,Y]|Tiles], [['sink',X,Y]|SinkList]) :- list_sinks(Tiles, SinkList).
