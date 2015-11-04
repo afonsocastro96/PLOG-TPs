@@ -1,5 +1,6 @@
 %MODULES
 :- use_module(library(random)).
+:- use_module(library(lists)).
 :- dynamic board_cell/3.
 :- dynamic board_length/1.
 :- dynamic sink_streak/2.
@@ -365,7 +366,7 @@ max_y_aux(Y, MaxY) :- var(MaxY), MaxY = Y.
 
 
 
-
+%Available Actions
 available_actions(Player, Actions) :-	pass_actions(Player, PassActions), move_actions(Player, MoveActions),
 										slide_actions(Player, SlideActions), sink_actions(Player, SinkActions),
 										append(PassActions, MoveActions, L1), append(L1, SlideActions, L2),
@@ -403,3 +404,85 @@ sink_actions(Player, SinkActions) :- 	player_tower(Player, Tower), tower_positio
 										append(SinkActions1, SinkActions2, SinkActions).
 list_sinks([],[]).
 list_sinks([[X,Y]|Tiles], [['sink',X,Y]|SinkList]) :- list_sinks(Tiles, SinkList).
+
+%Evaluation funtions
+evaluate_board(Player, Score) :- number_tiles_criteria(Score1),
+		sinkable_tiles_criteria(Score2), islands_criteria(Score3),
+		sink_streak_criteria(Score4), winning_criteria(Score5)
+		Calc is Score1 + Score2 + Score3 + Score4 + Score5,
+		(Player \= 'white' -> Score = Calc; Score is -Calc).
+
+number_tiles_criteria(Score) :- number_blacks(B), number_whites(W), number_circles(C), number_squares(S),
+								Score is W + C - (B + S).
+
+sinkable_tiles_criteria(Score) :- 	player_tower('white', WTower), tower_positions(WTower, [[WX1,WY1],[WX2,WY2]]),
+									sinkable_tiles(WX1, WY1, WSinks1), sinkable_tiles(WX2, WY2, WSinks2),
+									append(WSinks1, WSinks2, WSinks), sinkable_tiles_criteria_aux(WSinks, WScore)
+									player_tower('black', BTower), tower_positions(BTower, [[BX1,BY1],[BX2,BY2]]),
+									sinkable_tiles(BX1, BY1, BSinks1), sinkable_tiles(BX2, BY2, BSinks2),
+									append(BSinks1, BSinks2, BSinks), sinkable_tiles_criteria_aux(BSinks, BScore),
+									Score is WScore - BScore.
+	.
+sinkable_tiles_criteria_aux([], 0).
+sinkable_tiles_criteria_aux([[X,Y]|Sinks], Score) :-	sinkable_tiles_criteria_aux(Sinks, Score1),
+														sinkable_tiles_score(X, Y, Score2),
+														Score is Score1 + Score2.
+sinkable_tiles_score(X, Y, Score) :- 	board_length(Length), MaxDist is Length/sqrt(2),
+										CX is truncate(Length / 2), CY = CX,
+										Dist is sqrt((CX - X)^2+(CY - Y)^2),
+										Score is 10 * (MaxDist - Dist) / MaxDist.
+										
+islands_criteria(Score) :- 	island_score('white', WScore), island_score('black', BScore),
+							Score is WScore - BScore.
+
+island_score('white', Score) :-	player_tower('white', Tower), tower_positions(Tower,[[X1,Y1],[X2,Y2]]),
+								light_island(X1,Y1,LightIsland1), circle_island(X1,Y1,CircleIsland1),
+								light_island(X2,Y2,LightIsland2), circle_island(X2,Y2,CircleIsland2),
+								number_whites(Whites), number_circles(Circles),
+								Score is 50*((length(LightIsland1) + length(LightIsland2))/ Whites +
+											(length(CircleIsland1) + length(CircleIsland2)) / Circles).
+											
+island_score('black', Score) :-	player_tower('black', Tower), tower_positions(Tower,[[X1,Y1],[X2,Y2]]),
+								dark_island(X1,Y1,DarkIsland1), square_island(X1,Y1,SquareIsland1),
+								dark_island(X2,Y2,DarkIsland2), square_island(X2,Y2,SquareIsland2),
+								number_blacks(Blacks), number_squares(Squares),
+								Score is 50*(length(DarkIsland1) + length(DarkIsland2))/ Blacks +
+											(length(SquareIsland1) + length(SquareIsland2)) / Squares).
+											
+sink_streak_criteria(Score) :- sink_streak('white', Sinks), !, Score is 20 * Sinks.
+sink_streak_criteria(Score) :- sink_streak('black', Sinks), !, Score is -20 * Sinks.
+
+%% TODO: fix check_winning_condition to return winner instead of asserting it
+winning_criteria(Score) :- check_winning_condition, retract(winner(Winner)),
+							(Winner = 'white' -> Score is 10000; Score is -10000).
+							
+							
+bot_action(0, Player, Action) :- available_actions(Player, Actions), length(Actions, Length),
+								 random(0, Length, Index), nth0(Index,Actions, Action).
+								 
+bot_action(1, Player, Action) :- available_actions(Player, Actions), bot_action_helper(Player, Actions, -10000, [], Action).
+
+bot_action_helper(_,[], _, BestAction, BestAction).
+bot_action_helper(Player, [Action|Actions], BestScore, BestAction, SelectedAction) :-
+	evaluate_action(Player, Action, Score),
+	(Score > BestScore -> (NScore = Score, NAction = Action); (NScore = BestScore, NAction = BestAction)),
+	bot_action_helper(Player, Actions, NScore, NAction, SelectedAction).
+	
+evaluate_action(Player, ['pass'], Score) :-
+	evaluate_board(Player, Score).
+	
+evaluate_action(Player, ['move', X, Y, NX, NY]) :-
+	player_tower(Player, Tower), remove_tower(X, Y), insert_tower(NX, NY, Tower),
+	evaluate_board(Player, Score),
+	remove_tower(NX, NY), insert_tower(X, Y, Tower).
+	
+evaluate_action(Player, ['slide', X, Y, NX, NY]) :-
+	board_cell(X, Y, Cell), remove_tile(X,Y), add_tile(NX, NY, Cell),
+	evaluate_board(Player, Score),
+	remove_tile(NX, NY), add_tile(X, Y, Cell).
+	
+evaluate_action(Player, ['sink', X, Y]) :-
+	board_cell(X, Y, Cell), remove_tile(X, Y),
+	evaluate_board(Player, Score),
+	add_tile(X, Y, Cell).
+	
