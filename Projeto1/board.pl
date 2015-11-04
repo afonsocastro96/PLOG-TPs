@@ -53,9 +53,9 @@ insert_tower(X,Y,'T') :- board_cell(X,Y,[' ',_,_]), \+ board_cell(X,Y,[_,'B','C'
 remove_tower(X,Y) :- board_cell(X,Y,[_,Colour,Shape]), change_tile(X,Y,[' ', Colour, Shape]).
 
 %Start game
-start_game :- board_length(Length), purge_database(Length), game. %Esta linha vai ser apagada, so esta aqui para nao ter de fazer isto a toda a hora.
+start_game :- board_length(Length), purge_database(Length), !, game. %Esta linha vai ser apagada, so esta aqui para nao ter de fazer isto a toda a hora.
 start_game :- game.
-game :- write('Please state the board you want (major/minor): '), read(X), create_board(X), pick_tower, pick_colour, game_cycle, write('\nPlayer '), winner(Player), write(Player), write(' has won the game!').
+game :- write('Please state the board you want (major/minor): '), read(X), create_board(X), !, pick_tower, pick_colour, game_cycle, write('\nPlayer '), winner(Player), write(Player), write(' has won the game!').
 create_board(minor) :- create_database(5), randomize_board_minor.
 create_board(major) :- create_database(7), randomize_board_major.
 
@@ -294,11 +294,11 @@ free_edges([[X,Y]|Tiles], MoreTiles) :- \+board_cell(X,Y,_), free_edges(Tiles, M
 free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- A is X+1, \+board_cell(A,Y,_), !, free_edges(Tiles, MoreTiles).
 free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- B is X-1, \+board_cell(B,Y,_), !,free_edges(Tiles, MoreTiles).
 free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- C is Y+1, \+board_cell(X,C,_), !,free_edges(Tiles, MoreTiles).
-free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- D is X-1, \+board_cell(X,D,_), !,free_edges(Tiles, MoreTiles).
+free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- D is Y-1, \+board_cell(X,D,_), !,free_edges(Tiles, MoreTiles).
 free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- A is X+1, board_cell(A,Y,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
 free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- B is X-1, board_cell(B,Y,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
 free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- C is Y+1, board_cell(X,C,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
-free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- D is X-1, board_cell(X,D,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
+free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- D is Y-1, board_cell(X,D,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
 free_edges([_|Tiles], MoreTiles) :- free_edges(Tiles,MoreTiles).
 
 empty_tiles([],[]).
