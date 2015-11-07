@@ -1,0 +1,34 @@
+\select@language {portuguese}
+\contentsline {section}{\numberline {1}Introdu\IeC {\c c}\IeC {\~a}o}{4}
+\contentsline {section}{\numberline {2}O Jogo Syrtis}{4}
+\contentsline {subsection}{\numberline {2.1}Hist\IeC {\'o}ria}{4}
+\contentsline {subsection}{\numberline {2.2}Objetivo}{4}
+\contentsline {subsection}{\numberline {2.3}Equipamento}{4}
+\contentsline {subsection}{\numberline {2.4}Prepara\IeC {\c c}\IeC {\~a}o}{4}
+\contentsline {subsection}{\numberline {2.5}Ilhas}{5}
+\contentsline {subsection}{\numberline {2.6}Ac\IeC {\c c}\IeC {\~o}es}{6}
+\contentsline {subsubsection}{\numberline {2.6.1}Mover uma torre}{6}
+\contentsline {subsubsection}{\numberline {2.6.2}Afundar uma pe\IeC {\c c}a}{6}
+\contentsline {subsubsection}{\numberline {2.6.3}Deslocar uma pe\IeC {\c c}a}{6}
+\contentsline {subsubsection}{\numberline {2.6.4}Passar a vez}{7}
+\contentsline {subsection}{\numberline {2.7}Fim do jogo}{7}
+\contentsline {subsubsection}{\numberline {2.7.1}Ilha completa}{8}
+\contentsline {subsubsection}{\numberline {2.7.2}Areias movedi\IeC {\c c}as}{8}
+\contentsline {subsubsection}{\numberline {2.7.3}Iniciativa}{8}
+\contentsline {section}{\numberline {3}L\IeC {\'o}gica do Jogo}{9}
+\contentsline {subsection}{\numberline {3.1}Representa\IeC {\c c}\IeC {\~a}o do Estado do Jogo}{9}
+\contentsline {subsection}{\numberline {3.2}Visualiza\IeC {\c c}\IeC {\~a}o do Tabuleiro}{10}
+\contentsline {subsection}{\numberline {3.3}Lista de Jogadas V\IeC {\'a}lidas}{10}
+\contentsline {subsection}{\numberline {3.4}Execu\IeC {\c c}\IeC {\~a}o de Jogadas}{11}
+\contentsline {subsection}{\numberline {3.5}Avalia\IeC {\c c}\IeC {\~a}o do Tabuleiro}{11}
+\contentsline {subsubsection}{\numberline {3.5.1}Crit\IeC {\'e}rio do n\IeC {\'u}mero de pe\IeC {\c c}as}{11}
+\contentsline {subsubsection}{\numberline {3.5.2}Crit\IeC {\'e}rio da proximidade ao centro}{11}
+\contentsline {subsubsection}{\numberline {3.5.3}Crit\IeC {\'e}rio das ilhas}{12}
+\contentsline {subsubsection}{\numberline {3.5.4}Crit\IeC {\'e}rio da sequ\IeC {\^e}ncia de pe\IeC {\c c}as afundadas}{13}
+\contentsline {subsubsection}{\numberline {3.5.5}Crit\IeC {\'e}rio de vit\IeC {\'o}ria}{13}
+\contentsline {subsection}{\numberline {3.6}Final do Jogo}{13}
+\contentsline {subsection}{\numberline {3.7}Jogada do Computador}{13}
+\contentsline {section}{\numberline {4}Interface com o Utilizador}{14}
+\contentsline {section}{\numberline {5}Conclus\IeC {\~o}es}{14}
+\contentsline {section}{Bibliografia}{15}
+\contentsline {section}{\numberline {A}C\IeC {\'o}digo Fonte}{15}
