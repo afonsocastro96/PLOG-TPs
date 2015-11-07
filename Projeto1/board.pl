@@ -48,9 +48,11 @@ write_col_coords_aux(Col) :- board_length(Length), Col < Length, !, Charcode is 
 write_col_coords_aux(Col) :- board_length(Length), Col is Length, !, nl.
 
 %Insert and remove a tower in a given place
-insert_tower(X,Y,'L') :- board_cell(X,Y,[' ',_,_]), \+ board_cell(X,Y,[_,'P','Q']), \+ board_cell(X,Y,[_, ' ', ' ']), board_cell(X,Y,[_,Colour,Shape]), change_tile(X,Y,['L',Colour,Shape]).
-insert_tower(X,Y,'T') :- board_cell(X,Y,[' ',_,_]), \+ board_cell(X,Y,[_,'B','C']), \+ board_cell(X,Y,[_, ' ', ' ']), board_cell(X,Y,[_,Colour,Shape]), change_tile(X,Y,['T',Colour,Shape]).
-remove_tower(X,Y) :- board_cell(X,Y,[_,Colour,Shape]), change_tile(X,Y,[' ', Colour, Shape]).
+insert_tower(X,Y,'L') :- board_cell(X,Y,[' ','B',Shape]), !, change_tile(X,Y,['L','B',Shape]).
+insert_tower(X,Y,'L') :- board_cell(X,Y,[' ',Colour,'C']), !, change_tile(X,Y,['L',Colour,'C']).
+insert_tower(X,Y,'T') :- board_cell(X,Y,[' ','P',Shape]), !, change_tile(X,Y,['T','P',Shape]).
+insert_tower(X,Y,'T') :- board_cell(X,Y,[' ',Colour,'Q']), !, change_tile(X,Y,['T',Colour,'Q']).
+remove_tower(X,Y) :- board_cell(X,Y,[Tower,Colour,Shape]), Tower \= ' ', change_tile(X,Y,[' ', Colour, Shape]).
 
 %Start game
 start_game :- pick_play_mode.
@@ -58,8 +60,8 @@ pick_play_mode :- write('Please state the desired play mode (1- Player vs Comput
 test_mode(1) :- game_cvp.
 test_mode(2) :- game_pvp.
 test_mode(_) :- nl, write('Invalid mode!'), nl, pick_play_mode.
-game_pvp :- once(ask_board), once(pick_tower), !, pick_colour, game_cycle(Winner), end_game(Winner).
-game_cvp :- once(ask_board), once(pick_tower), !, bot_pick_colour(Colour), assert(bot_colour(Colour)), nl, write('Bot picked the '), write(Colour), write(' colour'), nl, game_cycle_cvp(Winner), end_game(Winner).
+game_pvp :- once(ask_board), once(pick_towers), !, pick_colour, game_cycle(Winner), end_game(Winner).
+game_cvp :- once(ask_board), once(pick_towers), !, bot_pick_colour(Colour), assert(bot_colour(Colour)), nl, write('Bot picked the '), write(Colour), write(' colour'), nl, game_cycle_cvp(Winner), end_game(Winner).
 
 %Creates the chosen board.
 create_board(minor) :- create_database(5), randomize_board_minor.
@@ -157,21 +159,39 @@ ask_board :- write('Please state the board you want (major/minor): '), read(X), 
 end_game(Winner) :- nl, write('Player '), write(Winner), write(' has won the game!'), board_length(Length), purge_database(Length).
 
 % Player 1 picks the towers
-pick_tower_aux(Character, Number, Tower) :- Tower == 'L', char_code(Character,Charcode), write('\n'), Y is Charcode-97, X is Number-1, insert_tower(X, Y, Tower).
-pick_tower_aux(Character, Number, Tower) :- Tower == 'T', char_code(Character,Charcode), write('\n'), Y is Charcode-97, X is Number-1, insert_tower(X, Y, Tower).
+pick_towers :-
+	once(pick_tower1),
+	once(pick_tower2),
+	once(pick_tower3),
+	once(pick_tower4).
 
-pick_tower :- display_board, write('Player 1: State the vertical coordinate of the first white tower: (Ex: a.)'), read(Character), write('State the horizontal coordinate of the first white tower: (Ex: 1.)'), read(Number), validate_pick_tower(Character, Number), !, pick_tower_aux(Character, Number, 'L'), once(pick_tower2).
-validate_pick_tower(Character, Number) :- integer(Number), board_length(Length), Number =< Length, !.
-validate_pick_tower(_,_) :- write('Invalid tower placement!'), nl, nl, pick_tower.
-pick_tower2 :- display_board, write('Player 1: State the vertical coordinate of the second white tower: (Ex: a.)'), read(Character),  write('State the horizontal coordinate of the second white tower: (Ex: 1.)'), read(Number), validate_pick_tower2(Character, Number), !, pick_tower_aux(Character, Number, 'L'), once(pick_tower3).
-validate_pick_tower2(Character, Number):- integer(Number), board_length(Length), Number =< Length.
-validate_pick_tower2(_,_) :- write('Invalid tower placement!'), nl, nl, pick_tower2.
-pick_tower3 :- display_board, write('Player 1: State the vertical coordinate of the first black tower: (Ex: a.)'), read(Character),  write('State the horizontal coordinate of the first black tower: (Ex: 1.)'), read(Number), validate_pick_tower3(Character, Number), !, pick_tower_aux(Character, Number, 'T'), once(pick_tower4).
-validate_pick_tower3(Character, Number) :- integer(Number), board_length(Length), Number =< Length.
-validate_pick_tower3(_,_) :- write('Invalid tower placement!'), nl, nl, pick_tower3.
-pick_tower4 :- display_board, write('Player 1: State the vertical coordinate of the second black tower: (Ex: a.)'), read(Character),  write('State the horizontal coordinate of the second black tower: (Ex: 1.)'), read(Number), validate_pick_tower4(Character, Number), !, pick_tower_aux(Character, Number, 'T').
-validate_pick_tower4(Character, Number) :- integer(Number), board_length(Length), Number =< Length.
-validate_pick_tower4(_,_) :- write('Invalid tower placement!'), nl, nl, pick_tower4.
+validate_pick_tower(Character, Number, X, Y) :-
+	char_code(Character,Charcode), Y is Charcode-97, X is Number-1. 
+
+pick_tower1 :- display_board,
+	write('Player 1: State the vertical coordinate of the first white tower: (Ex: a.)'),read(Character),
+	write('State the horizontal coordinate of the first white tower: (Ex: 1.)'), read(Number),
+	validate_pick_tower(Character, Number, X, Y), insert_tower(X, Y, 'L'), !.
+pick_tower1 :- write('Invalid tower placement!'), nl, pick_tower1.
+
+pick_tower2 :- display_board,
+	write('Player 1: State the vertical coordinate of the second white tower: (Ex: a.)'), read(Character),
+	write('State the horizontal coordinate of the second white tower: (Ex: 1.)'), read(Number),
+	validate_pick_tower(Character, Number, X, Y), insert_tower(X, Y, 'L'), !.
+pick_tower2 :- write('Invalid tower placement!'), nl, pick_tower2.
+
+
+pick_tower3 :- display_board,
+	write('Player 1: State the vertical coordinate of the first black tower: (Ex: a.)'), read(Character),
+	write('State the horizontal coordinate of the first black tower: (Ex: 1.)'), read(Number),
+	validate_pick_tower3(Character, Number, X, Y), insert_tower(X, Y, 'T'), !.
+pick_tower3 :- write('Invalid tower placement!'), nl, pick_tower3.
+
+pick_tower4 :- display_board,
+	write('Player 1: State the vertical coordinate of the second black tower: (Ex: a.)'), read(Character),
+	write('State the horizontal coordinate of the second black tower: (Ex: 1.)'), read(Number),
+	validate_pick_tower4(Character, Number, X, Y), insert_tower(X, Y, 'T'), !.
+pick_tower4 :- write('Invalid tower placement!'), nl, pick_tower4.
 
 % Player two picks the colour
 pick_colour :- display_board, write('Player 2: Choose your colour. From now on you will be identified with your colour (white/black): '), read(Colour), colour_picked(Colour).
