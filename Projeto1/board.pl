@@ -266,12 +266,12 @@ reachable_tiles(X, Y, Tiles) :- reachable_tiles_aux([[X,Y]],[], Tiles).
 reachable_tiles_aux([],_, []).
 reachable_tiles_aux([Next|T], Visited, Reachable) :- member(Next, Visited), !, reachable_tiles_aux(T, Visited, Reachable).
 reachable_tiles_aux([[X, Y]|T], Visited, [[X, Y]|Reachable]) :- board_cell(X, Y, Cell), Cell \= [' ', ' ', ' '], !,
-neighbour_tiles(X,Y,Neighbours), append(T, Neighbours, NT),
+neighbour_cells(X,Y,Neighbours), append(T, Neighbours, NT),
 reachable_tiles_aux(NT, [[X,Y]|Visited], Reachable).
 reachable_tiles_aux([Next|T], Visited, Reachable) :- reachable_tiles_aux(T, [Next|Visited], Reachable).
 
 %neighbour positions
-neighbour_tiles(X, Y, Neighbours) :- 
+neighbour_cells(X, Y, Neighbours) :- 
 NX is X + 1, PX is X - 1, NY is Y + 1, PY is Y - 1,
 Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY],
 cells_only([Alt1, Alt2, Alt3, Alt4], Neighbours).
@@ -286,7 +286,7 @@ dark_island(X, Y, []) :- \+ board_cell(X,Y,[_,'P',_]), !.
 dark_island_search([], _, []).
 dark_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, dark_island_search(T,Visited,Island).
 dark_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,'P',_]), !,
-neighbour_tiles(X,Y,Neighbours), append(T, Neighbours, NT),
+neighbour_cells(X,Y,Neighbours), append(T, Neighbours, NT),
 dark_island_search(NT, [[X,Y]|Visited], Island).
 dark_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,'P',_]), !,
 dark_island_search(T,[[X,Y]|Visited], Island).
@@ -296,7 +296,7 @@ light_island(X, Y, []) :- \+ board_cell(X,Y,[_,'B',_]), !.
 light_island_search([], _, []).
 light_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, light_island_search(T,Visited,Island).
 light_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,'B',_]), !,
-neighbour_tiles(X,Y,Neighbours), append(T, Neighbours, NT),
+neighbour_cells(X,Y,Neighbours), append(T, Neighbours, NT),
 light_island_search(NT, [[X,Y]|Visited], Island).
 light_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,'B',_]), !,
 light_island_search(T,[[X,Y]|Visited], Island).
@@ -306,7 +306,7 @@ circle_island(X, Y, []) :- \+ board_cell(X,Y,[_,_,'C']), !.
 circle_island_search([], _, []).
 circle_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, circle_island_search(T,Visited,Island).
 circle_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,_,'C']), !,
-neighbour_tiles(X,Y,Neighbours), append(T, Neighbours, NT),
+neighbour_cells(X,Y,Neighbours), append(T, Neighbours, NT),
 circle_island_search(NT, [[X,Y]|Visited], Island).
 circle_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,_,'C']), !,
 circle_island_search(T,[[X,Y]|Visited], Island).
@@ -316,7 +316,7 @@ square_island(X, Y, []) :- \+ board_cell(X,Y,[_,_,'Q']), !.
 square_island_search([], _, []).
 square_island_search([Tile|T], Visited, Island) :- member(Tile, Visited), !, square_island_search(T,Visited,Island).
 square_island_search([[X,Y]|T], Visited, [[X,Y]|Island]) :- \+ member([X,Y],Visited), board_cell(X,Y,[_,_,'Q']), !,
-neighbour_tiles(X,Y,Neighbours), append(T, Neighbours, NT),
+neighbour_cells(X,Y,Neighbours), append(T, Neighbours, NT),
 square_island_search(NT, [[X,Y]|Visited], Island).
 square_island_search([[X,Y]|T], Visited, Island) :- \+ member([X,Y], Visited), \+ board_cell(X,Y,[_,_,'Q']), !,
 square_island_search(T,[[X,Y]|Visited], Island).
@@ -327,20 +327,14 @@ tower('L').
 tower('T').
 tower_positions(Tower, [[X1, Y1], [X2, Y2]]) :- tower(Tower), board_cell(X1,Y1,[Tower,_,_]), board_cell(X2,Y2,[Tower,_,_]), [X1,Y1] \= [X2,Y2].
 
-sinkable_tiles(X,Y,Tiles) :- \+board_cell(X,Y,[' ',_,_]), !, neighbour_tiles(X,Y,Neighbours), free_edges(Neighbours,FreeEdges),
+sinkable_tiles(X,Y,Tiles) :- board_cell(X,Y,[Tower,_,_]), Tower \= ' ',!, neighbour_cells(X,Y,Neighbours), free_edges(Neighbours,FreeEdges),
 empty_tiles(FreeEdges, EmptyTiles), sinkable_tiles_valid(EmptyTiles, Tiles).
 sinkable_tiles(_,_,[]).
 
 free_edges([], []).
 free_edges([[X,Y]|Tiles], MoreTiles) :- \+board_cell(X,Y,_), free_edges(Tiles, MoreTiles).
-free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- A is X+1, \+board_cell(A,Y,_), !, free_edges(Tiles, MoreTiles).
-free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- B is X-1, \+board_cell(B,Y,_), !,free_edges(Tiles, MoreTiles).
-free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- C is Y+1, \+board_cell(X,C,_), !,free_edges(Tiles, MoreTiles).
-free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- D is Y-1, \+board_cell(X,D,_), !,free_edges(Tiles, MoreTiles).
-free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- A is X+1, board_cell(A,Y,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
-free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- B is X-1, board_cell(B,Y,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
-free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- C is Y+1, board_cell(X,C,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
-free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- D is Y-1, board_cell(X,D,[' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
+free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- neighbour_cells(X, Y, Neighbours), length(Neighbours, NumNeighbours), NumNeighbours \= 4, !, free_edges(Tiles, MoreTiles).
+free_edges([[X,Y]|Tiles], [[X,Y]|MoreTiles]) :- neighbour_cells(X, Y, Neighbours), member([X1, Y1], Neighbours), board_cell(X1, Y1, [' ',' ',' ']), !,free_edges(Tiles, MoreTiles).
 free_edges([_|Tiles], MoreTiles) :- free_edges(Tiles,MoreTiles).
 
 empty_tiles([],[]).
@@ -355,13 +349,13 @@ sinkable_tiles_valid([[X,Y]|Tiles],ValidTiles) :- sinkable_tiles_valid(Tiles, VT
 
 %searching slidable positions
 slidable_tiles(X, Y, Tiles) :- \+ board_cell(X, Y, [' ',_,_]),
-neighbour_tiles(X,Y,Neighbours), slidable_tiles_search(Neighbours, [[X,Y]], PTiles),
+neighbour_cells(X,Y,Neighbours), slidable_tiles_search(Neighbours, [[X,Y]], PTiles),
 slidable_tiles_valid(X, Y, PTiles, Tiles).
 
 slidable_tiles_search([],_,[]).
 slidable_tiles_search([Tile|T], Visited, PTiles) :- member(Tile, Visited), !, slidable_tiles_search(T, Visited, PTiles).
 slidable_tiles_search([[X,Y]|T], Visited, [[X,Y]|PTiles]) :- \+ member([X,Y], Visited), board_cell(X, Y, [' ',' ',' ']), within_board_limits(X,Y), !,
-neighbour_tiles(X, Y, Neighbours), append(T, Neighbours, NT),
+neighbour_cells(X, Y, Neighbours), append(T, Neighbours, NT),
 slidable_tiles_search(NT, [[X,Y]|Visited], PTiles).
 slidable_tiles_search([[X,Y]|T], Visited, PTiles) :- \+ member([X,Y], Visited), !,
 slidable_tiles_search(T,[[X,Y]|Visited], PTiles).
