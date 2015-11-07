@@ -184,13 +184,13 @@ pick_tower2 :- write('Invalid tower placement!'), nl, pick_tower2.
 pick_tower3 :- display_board,
 	write('Player 1: State the vertical coordinate of the first black tower: (Ex: a.)'), read(Character),
 	write('State the horizontal coordinate of the first black tower: (Ex: 1.)'), read(Number),
-	validate_pick_tower3(Character, Number, X, Y), insert_tower(X, Y, 'T'), !.
+	validate_pick_tower(Character, Number, X, Y), insert_tower(X, Y, 'T'), !.
 pick_tower3 :- write('Invalid tower placement!'), nl, pick_tower3.
 
 pick_tower4 :- display_board,
 	write('Player 1: State the vertical coordinate of the second black tower: (Ex: a.)'), read(Character),
 	write('State the horizontal coordinate of the second black tower: (Ex: 1.)'), read(Number),
-	validate_pick_tower4(Character, Number, X, Y), insert_tower(X, Y, 'T'), !.
+	validate_pick_tower(Character, Number, X, Y), insert_tower(X, Y, 'T'), !.
 pick_tower4 :- write('Invalid tower placement!'), nl, pick_tower4.
 
 % Player two picks the colour
