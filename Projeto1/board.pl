@@ -226,11 +226,11 @@ char_code(Character,Charcode), write('\n'), Y is Charcode-97, X is Number-1,
 char_code(NCharacter,NCharcode), write('\n'), NY is NCharcode-97, NX is NNumber-1,
 move_tower_aux(X,Y,NX,NY).
 
-slide_tile_aux(X,Y,NX,NY) :- valid_slide(X,Y,NX,NY), board_cell(X,Y,Elem), change_tile(NX,NY,Elem), change_tile(X,Y,[' ', ' ', ' ']), current_player(Player), reset_pass(Player), once(change_player).
+slide_tile_aux(X,Y,NX,NY) :- valid_slide(X,Y,NX,NY), !, board_cell(X,Y,Elem), change_tile(NX,NY,Elem), change_tile(X,Y,[' ', ' ', ' ']), current_player(Player), reset_pass(Player), once(change_player).
 slide_tile_aux(_,_,_,_) :- write('Invalid move!'), nl, nl.
-sink_tile_aux(X,Y) :- valid_sink(X,Y), remove_tile(X, Y), current_player(Player), sink_count(Player), reset_pass(Player), once(change_player).
+sink_tile_aux(X,Y) :- valid_sink(X,Y), !, remove_tile(X, Y), current_player(Player), sink_count(Player), reset_pass(Player), once(change_player).
 sink_tile_aux(_,_) :- write('Invalid move!'), nl, nl.
-move_tower_aux(X,Y,NX,NY) :- valid_move(X,Y,NX,NY), board_cell(X,Y,[Tower|_]), insert_tower(NX, NY, Tower), remove_tower(X,Y), current_player(Player), reset_pass(Player), once(change_player).
+move_tower_aux(X,Y,NX,NY) :- valid_move(X,Y,NX,NY), !, board_cell(X,Y,[Tower|_]), insert_tower(NX, NY, Tower), remove_tower(X,Y), current_player(Player), reset_pass(Player), once(change_player).
 move_tower_aux(_,_,_,_) :- write('Invalid move!'), nl, nl.
 pass :- current_player(Player), increment_pass(Player), once(change_player).
 
