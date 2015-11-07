@@ -59,7 +59,7 @@ test_mode(1) :- game_cvp.
 test_mode(2) :- game_pvp.
 test_mode(_) :- nl, write('Invalid mode!'), nl, pick_play_mode.
 game_pvp :- once(ask_board), once(pick_tower), !, pick_colour, game_cycle(Winner), end_game(Winner).
-game_cvp :- once(ask_board), once(pick_tower), !, bot_pick_colour(Colour), assert(bot_colour(Colour)), nl, write('Bot picked the '), write(Colour), write(' colour'), nl, game_cycle(Winner), end_game(Winner).
+game_cvp :- once(ask_board), once(pick_tower), !, bot_pick_colour(Colour), assert(bot_colour(Colour)), nl, write('Bot picked the '), write(Colour), write(' colour'), nl, game_cycle_cvp(Winner), end_game(Winner).
 
 %Creates the chosen board.
 create_board(minor) :- create_database(5), randomize_board_minor.
