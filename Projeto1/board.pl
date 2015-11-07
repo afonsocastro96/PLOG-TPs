@@ -271,9 +271,14 @@ reachable_tiles_aux(NT, [[X,Y]|Visited], Reachable).
 reachable_tiles_aux([Next|T], Visited, Reachable) :- reachable_tiles_aux(T, [Next|Visited], Reachable).
 
 %neighbour positions
-neighbour_tiles(X, Y, [Alt1, Alt2, Alt3, Alt4]) :- 
+neighbour_tiles(X, Y, Neighbours) :- 
 NX is X + 1, PX is X - 1, NY is Y + 1, PY is Y - 1,
-Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY].
+Alt1 = [NX, Y], Alt2 = [PX, Y], Alt3 = [X, NY], Alt4 = [X, PY],
+cells_only([Alt1, Alt2, Alt3, Alt4], Neighbours).
+
+cells_only([],[]).
+cells_only([[X, Y]|T1], [[X,Y]|T2]) :- board_cell(X,Y,_), !, cells_only(T1, T2).
+cells_only([[X,Y]|T1], T2) :- \+ board_cell(X, Y, _), !, cells_only(T1,T2).
 
 %searching islands
 dark_island(X, Y, Island) :- board_cell(X,Y,[_,'P',_]), !, dark_island_search([[X,Y]], [], Island).
