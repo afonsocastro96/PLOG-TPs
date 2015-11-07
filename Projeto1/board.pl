@@ -76,27 +76,35 @@ Database modifiers
 *****************/
 
 %Changes a tile's content
-add_tile(X,Y,[Tower,Colour, Shape]) :- board_cell(X,Y,[' ',' ',' ']), change_tile(X, Y, [Tower,Colour,Shape]), add_colour_shape(Colour, Shape).
-change_tile(X,Y,[Tower,Colour,Shape]) :- retract(board_cell(X,Y,_)), assert(board_cell(X,Y,[Tower,Colour,Shape])).
-remove_tile(X, Y) :- board_cell(X, Y, [_,Colour,Shape]), change_tile(X,Y,[' ',' ',' ']), remove_colour_shape(Colour, Shape).
+change_tile(X,Y,[Tower,Colour,Shape]) :-
+	retract(board_cell(X,Y,[_, PColour, PShape])), remove_colour_shape(PColour, PShape),
+	assert(board_cell(X,Y,[Tower,Colour,Shape])), add_colour_shape(Colour, Shape).
+add_tile(X,Y,[Tower,Colour, Shape]) :-
+	board_cell(X,Y,[' ',' ',' ']), change_tile(X, Y, [Tower,Colour,Shape]).
+remove_tile(X, Y) :-
+	change_tile(X,Y,[' ',' ',' ']).
 
 %Adds a colour/shape to the colour/shape counter
 add_colour_shape(Colour, Shape) :- add_colour(Colour), add_shape(Shape).
 add_colour('B') :- number_whites(N), NW is N+1, retract(number_whites(N)), assert(number_whites(NW)).
 add_colour('P') :- number_blacks(N), NB is N+1, retract(number_blacks(N)), assert(number_blacks(NB)).
+add_colour(' ').
 add_shape('Q') :- number_squares(N), NS is N+1, retract(number_squares(N)), assert(number_squares(NS)).
 add_shape('C') :- number_circles(N), NC is N+1, retract(number_circles(N)), assert(number_circles(NC)). 
+add_shape(' ').
 
 %Removes a colour/shape to the colour/shape counter
 remove_colour_shape(Colour, Shape) :- remove_colour(Colour), remove_shape(Shape).
 remove_colour('B') :- number_whites(N), NW is N-1, retract(number_whites(N)), assert(number_whites(NW)).
 remove_colour('P') :- number_blacks(N), NB is N-1, retract(number_blacks(N)), assert(number_blacks(NB)).
+remove_colour(' ').
 remove_shape('Q') :- number_squares(N), NS is N-1, retract(number_squares(N)), assert(number_squares(NS)).
 remove_shape('C') :- number_circles(N), NC is N-1, retract(number_circles(N)), assert(number_circles(NC)). 
+remove_shape(' ').
 
 %Tiles sinked counter - used to check win condition
-sink_count(Player) :- sink_streak(Player,Streak), NStreak is Streak+1, retract(sink_streak(_, Streak)), assert(sink_streak(Player,NStreak)).
-sink_count(Player) :- sink_streak(OPlayer,_), Player \= OPlayer, retract(sink_streak(_,_)), assert(sink_streak(Player, 1)).
+sink_count(Player) :- sink_streak(Player,Streak), !, NStreak is Streak+1, retract(sink_streak(_, Streak)), assert(sink_streak(Player,NStreak)).
+sink_count(Player) :- sink_streak(OPlayer,_), Player \= OPlayer, !, retract(sink_streak(_,_)), assert(sink_streak(Player, 1)).
 
 %Change current Player
 change_player :- retract(current_player('white')), assert(current_player('black')). 
@@ -104,7 +112,8 @@ change_player :- retract(current_player('black')), assert(current_player('white'
 
 %Change pass
 increment_pass(Player) :- retract(number_pass(Player, Pass)), NPass is Pass + 1, assert(number_pass(Player, NPass)).
-reset_pass(Player) :- retract(number_pass(Player, _)), assert(number_pass(Player, 0)).
+reset_pass(Player) :- set_pass(Player, 0).
+set_pass(Player, Pass) :- retract(number_pass(Player, _)), assert(number_pass(Player, Pass)).
 
 % Board randomizer
 randomize_board_major :- randomize(N), replace_board(3,2,3,4,N), randomize_board_major_3.
@@ -136,10 +145,10 @@ randomize_board_minor_13 :- randomize(N), replace_board(0,3,4,1,N), randomize_bo
 randomize_board_minor_15 :- randomize(N), replace_board(0,2,4,2,N).
 
 % Auxiliary function of the randomizer. 0-BC 1-PC 2-BQ 3-PQ
-replace_board(X1,Y1,X2,Y2,0) :- change_tile(X1,Y1,[' ','B','C']), change_tile(X2,Y2,[' ','P','Q']), add_colour_shape('B', 'C'), add_colour_shape('P', 'Q').
-replace_board(X1,Y1,X2,Y2,1) :- change_tile(X1,Y1,[' ','P','C']), change_tile(X2,Y2,[' ','B','Q']), add_colour_shape('P', 'C'), add_colour_shape('B', 'Q').
-replace_board(X1,Y1,X2,Y2,2) :- change_tile(X1,Y1,[' ','B','Q']), change_tile(X2,Y2,[' ','P','C']), add_colour_shape('B', 'Q'), add_colour_shape('P', 'C').
-replace_board(X1,Y1,X2,Y2,3) :- change_tile(X1,Y1,[' ','P','Q']), change_tile(X2,Y2,[' ','B','C']), add_colour_shape('P', 'Q'), add_colour_shape('B', 'C').
+replace_board(X1,Y1,X2,Y2,0) :- change_tile(X1,Y1,[' ','B','C']), change_tile(X2,Y2,[' ','P','Q']).
+replace_board(X1,Y1,X2,Y2,1) :- change_tile(X1,Y1,[' ','P','C']), change_tile(X2,Y2,[' ','B','Q']).
+replace_board(X1,Y1,X2,Y2,2) :- change_tile(X1,Y1,[' ','B','Q']), change_tile(X2,Y2,[' ','P','C']).
+replace_board(X1,Y1,X2,Y2,3) :- change_tile(X1,Y1,[' ','P','Q']), change_tile(X2,Y2,[' ','B','C']).
 
 %Asks the type of board
 ask_board :- write('Please state the board you want (major/minor): '), read(X), create_board(X).
@@ -219,7 +228,7 @@ move_tower_aux(X,Y,NX,NY).
 
 slide_tile_aux(X,Y,NX,NY) :- valid_slide(X,Y,NX,NY), board_cell(X,Y,Elem), change_tile(NX,NY,Elem), change_tile(X,Y,[' ', ' ', ' ']), current_player(Player), reset_pass(Player), once(change_player).
 slide_tile_aux(_,_,_,_) :- write('Invalid move!'), nl, nl.
-sink_tile_aux(X,Y) :- valid_sink(X,Y), board_cell(X, Y, [' ',C,S]), remove_colour_shape(C,S), change_tile(X,Y,[' ', ' ', ' ']), current_player(Player), sink_count(Player), reset_pass(Player), once(change_player).
+sink_tile_aux(X,Y) :- valid_sink(X,Y), remove_tile(X, Y), current_player(Player), sink_count(Player), reset_pass(Player), once(change_player).
 sink_tile_aux(_,_) :- write('Invalid move!'), nl, nl.
 move_tower_aux(X,Y,NX,NY) :- valid_move(X,Y,NX,NY), board_cell(X,Y,[Tower|_]), insert_tower(NX, NY, Tower), remove_tower(X,Y), current_player(Player), reset_pass(Player), once(change_player).
 move_tower_aux(_,_,_,_) :- write('Invalid move!'), nl, nl.
@@ -247,20 +256,33 @@ completed_light_island :- board_cell(X,Y,[_,'B',_]), light_island(X,Y,Island), n
 completed_square_island :- board_cell(X,Y,[_,_,'Q']), square_island(X,Y,Island), number_squares(N), length(Island, N).
 completed_circle_island :- board_cell(X,Y,[_,_,'C']), circle_island(X,Y,Island), number_circles(N), length(Island, N).
 
-valid_slide(X, Y, FinalX, FinalY) :- board_cell(X,Y,[Tower,_,_]), current_player(Player), player_tower(Player,Tower),slidable_tiles(X,Y,Tiles), member([FinalX,FinalY], Tiles).
-valid_move(X,Y,NX,NY) :- 	board_cell(X,Y,[Tower,_,_]), current_player(Player), player_tower(Player,Tower),
-board_cell(NX,NY, [' ',_,_]), [X, Y] \= [NX, NY], valid_move_aux(X,Y,NX,NY).
+valid_slide(X, Y, FinalX, FinalY) :-
+	current_player(Player), valid_slide(X, Y, FinalX, FinalY, Player).
+valid_slide(X, Y, FinalX, FinalY, Player) :-
+	board_cell(X,Y,[Tower,_,_]), player_tower(Player,Tower),
+	slidable_tiles(X,Y,Tiles), member([FinalX,FinalY], Tiles).
 
+	valid_move(X,Y,NX,NY) :-
+	current_player(Player), valid_move(X, Y, NX, NY, Player).
+valid_move(X,Y,NX,NY, Player) :-
+	board_cell(X,Y,[Tower,_,_]), player_tower(Player,Tower),
+	board_cell(NX,NY, [' ',_,_]), valid_move_aux(X,Y,NX,NY).
 valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['L','B',_]), light_island(X,Y,Island), member([NX,NY],Island).
 valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['L',_,'C']), circle_island(X,Y,Island), member([NX,NY],Island).
 valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['T','P',_]), dark_island(X,Y,Island), member([NX,NY],Island).
 valid_move_aux(X,Y,NX,NY) :- board_cell(X,Y,['T',_,'Q']), square_island(X,Y,Island), member([NX,NY],Island).
 
-valid_sink(X, Y) :- current_player(Player), player_tower(Player, Tower), tower_positions(Tower, [[X1, Y1], [X2, Y2]]),
-sinkable_tiles(X1, Y1, Tiles1), sinkable_tiles(X2, Y2, Tiles2), append(Tiles1, Tiles2, Sinkable),
-member([X,Y], Sinkable).
+valid_sink(X, Y) :-
+	current_player(Player), valid_sink(X, Y, Player).
+valid_sink(X, Y, Player) :-
+	player_tower(Player, Tower), tower_positions(Tower, [[X1, Y1], [X2, Y2]]),
+	sinkable_tiles(X1, Y1, Tiles1), sinkable_tiles(X2, Y2, Tiles2),
+	append(Tiles1, Tiles2, Sinkable), member([X,Y], Sinkable).
 
-connected_board :- 	board_cell(X, Y, [_, 'P', _]), reachable_tiles(X, Y, Tiles), length(Tiles, L), number_blacks(B), number_whites(W), !, L is B + W.
+
+connected_board :- 
+	board_cell(X, Y, [_, 'P', _]), reachable_tiles(X, Y, Tiles),
+	length(Tiles, L), number_blacks(B), number_whites(W), !, L is B + W.
 
 reachable_tiles(X, Y, Tiles) :- reachable_tiles_aux([[X,Y]],[], Tiles).
 reachable_tiles_aux([],_, []).
@@ -329,7 +351,7 @@ tower_positions(Tower, [[X1, Y1], [X2, Y2]]) :- tower(Tower), board_cell(X1,Y1,[
 
 sinkable_tiles(X,Y,Tiles) :- board_cell(X,Y,[Tower,_,_]), Tower \= ' ',!, neighbour_cells(X,Y,Neighbours), free_edges(Neighbours,FreeEdges),
 empty_tiles(FreeEdges, EmptyTiles), sinkable_tiles_valid(EmptyTiles, Tiles).
-sinkable_tiles(_,_,[]).
+sinkable_tiles(X,Y,[]) :- board_cell(X, Y, [' ',_,_]).
 
 free_edges([], []).
 free_edges([[X,Y]|Tiles], MoreTiles) :- \+board_cell(X,Y,_), free_edges(Tiles, MoreTiles).
@@ -348,9 +370,10 @@ sinkable_tiles_valid([[X,Y]|Tiles],ValidTiles) :- sinkable_tiles_valid(Tiles, VT
 (connected_board -> ValidTiles = [[X,Y]|VTiles]; ValidTiles = VTiles), add_tile(X, Y, Cell).
 
 %searching slidable positions
-slidable_tiles(X, Y, Tiles) :- \+ board_cell(X, Y, [' ',_,_]),
-neighbour_cells(X,Y,Neighbours), slidable_tiles_search(Neighbours, [[X,Y]], PTiles),
-slidable_tiles_valid(X, Y, PTiles, Tiles).
+slidable_tiles(X, Y, Tiles) :-
+	board_cell(X, Y, [Tower,_,_]), Tower \= ' ',
+	neighbour_cells(X,Y,Neighbours), slidable_tiles_search(Neighbours, [[X,Y]], PTiles),
+	slidable_tiles_valid(X, Y, PTiles, Tiles).
 
 slidable_tiles_search([],_,[]).
 slidable_tiles_search([Tile|T], Visited, PTiles) :- member(Tile, Visited), !, slidable_tiles_search(T, Visited, PTiles).
@@ -390,7 +413,6 @@ min_y(MinY) :- min_y_aux(0, MinY).
 min_y_aux(Y, MinY) :- once(tiles_in_Y(Y, Tiles)), Tiles = [], !, NY is Y + 1, min_y_aux(NY, MinY).
 min_y_aux(Y, MinY) :- var(MinY), MinY = Y.
 
-
 max_y(MaxY) :- board_length(Length), Y is Length - 1, max_y_aux(Y,MaxY).
 max_y_aux(Y, MaxY) :- once(tiles_in_Y(Y, Tiles)), Tiles = [], !, PY is Y - 1, max_y_aux(PY, MaxY).
 max_y_aux(Y, MaxY) :- var(MaxY), MaxY = Y.
@@ -398,41 +420,53 @@ max_y_aux(Y, MaxY) :- var(MaxY), MaxY = Y.
 
 
 %Available Actions
-available_actions(Player, Actions) :-	pass_actions(Player, PassActions), move_actions(Player, MoveActions),
-slide_actions(Player, SlideActions), sink_actions(Player, SinkActions),
-append(PassActions, MoveActions, L1), append(L1, SlideActions, L2),
-append(L2, SinkActions, Actions).
+available_actions(Player, Actions) :-
+	pass_actions(Player, PassActions), move_actions(Player, MoveActions),
+	slide_actions(Player, SlideActions), sink_actions(Player, SinkActions),
+	append(PassActions, MoveActions, L1), append(L1, SlideActions, L2),
+	append(L2, SinkActions, Actions).
 
 pass_actions(_, [['pass']]).
 
-move_actions('white', MoveActions) :- 	player_tower('white', Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
-light_island(X1,Y1,LightIsland1), circle_island(X1,Y1,CircleIsland1),
-append(LightIsland1, CircleIsland1, Island1), list_moves(X1, Y1, Island1, MoveActions1),
-light_island(X2,Y2,LightIsland2), circle_island(X2,Y2,CircleIsland2),
-append(LightIsland2, CircleIsland2, Island2), list_moves(X2, Y2, Island2, MoveActions2),
-append(MoveActions1, MoveActions2, MoveActions).
-move_actions('black', MoveActions) :- 	player_tower('black', Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
-dark_island(X1,Y1,DarkIsland1), square_island(X1,Y1,SquareIsland1),
-append(DarkIsland1, SquareIsland1, Island1), list_moves(X1, Y1, Island1, MoveActions1),
-dark_island(X2,Y2,DarkIsland2), square_island(X2,Y2,SquareIsland2),
-append(DarkIsland2, SquareIsland2, Island2), list_moves(X2, Y2, Island2, MoveActions2),
-append(MoveActions1, MoveActions2, MoveActions).
+move_actions('white', MoveActions) :-
+	player_tower('white', Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
+	light_island(X1,Y1,LightIsland1), circle_island(X1,Y1,CircleIsland1),
+	append(LightIsland1, CircleIsland1, Island1), list_moves(X1, Y1, Island1, MoveActions1),
+	light_island(X2,Y2,LightIsland2), circle_island(X2,Y2,CircleIsland2),
+	append(LightIsland2, CircleIsland2, Island2), list_moves(X2, Y2, Island2, MoveActions2),
+	append(MoveActions1, MoveActions2, MoveActions).
+move_actions('black', MoveActions) :-
+	player_tower('black', Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
+	dark_island(X1,Y1,DarkIsland1), square_island(X1,Y1,SquareIsland1),
+	append(DarkIsland1, SquareIsland1, Island1), list_moves(X1, Y1, Island1, MoveActions1),
+	dark_island(X2,Y2,DarkIsland2), square_island(X2,Y2,SquareIsland2),
+	append(DarkIsland2, SquareIsland2, Island2), list_moves(X2, Y2, Island2, MoveActions2),
+	append(MoveActions1, MoveActions2, MoveActions).
+remove_invalid_moves(_, _, [], []).
+remove_invalid_moves(StartX, StartY, [[StartX, StartY]|T], T1) :-
+	!, remove_invalid_moves(StartX, StartY, T, T1).
+remove_invalid_moves(StartX, StartY, [[X, Y]|T], T1) :-
+	board_cell(X, Y, [' ',_,_]), !, remove_invalid_moves(StartX, StartY, T, T1).
+remove_invalid_moves(StartX, StartY, [[X, Y]|T], [[X, Y]|T1]) :-
+	!, remove_invalid_moves(StartX, StartY, T, T1).
 list_moves(_, _, [], []).
-list_moves(StartX, StartY, [[StartX, StartY]|EndList], MoveList) :- !, list_moves(StartX, StartY, EndList, MoveList).
-list_moves(StartX, StartY, [[X, Y]|EndList], [['move',StartX,StartY,X,Y]|MoveList]) :- [StartX, StartY] \= [X, Y], !,
-list_moves(StartX, StartY, EndList, MoveList).
+list_moves(StartX, StartY, [[X, Y]|EndList], [['move',StartX,StartY,X,Y]|MoveList]) :-
+	list_moves(StartX, StartY, EndList, MoveList).
 
-slide_actions(Player, SlideActions) :-  player_tower(Player, Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
-slidable_tiles(X1,Y1,Slides1), list_slides(X1, Y1, Slides1, SlideActions1),
-slidable_tiles(X2,Y2,Slides2), list_slides(X2, Y2, Slides2, SlideActions2),
-append(SlideActions1, SlideActions2, SlideActions).
+slide_actions(Player, SlideActions) :- 
+	player_tower(Player, Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
+	slidable_tiles(X1,Y1,Slides1), list_slides(X1, Y1, Slides1, SlideActions1),
+	slidable_tiles(X2,Y2,Slides2), list_slides(X2, Y2, Slides2, SlideActions2),
+	append(SlideActions1, SlideActions2, SlideActions).
 list_slides(_, _, [], []).
-list_slides(StartX, StartY, [[X,Y]|EndList], [['slide',StartX, StartY, X, Y]|SlideList]) :- list_slides(StartX, StartY, EndList, SlideList).
+list_slides(StartX, StartY, [[X,Y]|EndList], [['slide',StartX, StartY, X, Y]|SlideList]) :-
+	list_slides(StartX, StartY, EndList, SlideList).
 
-sink_actions(Player, SinkActions) :- 	player_tower(Player, Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
-sinkable_tiles(X1, Y1, Sinks1), list_sinks(Sinks1, SinkActions1),
-sinkable_tiles(X2, Y2, Sinks2), list_sinks(Sinks2, SinkActions2),
-append(SinkActions1, SinkActions2, SinkActions).
+sink_actions(Player, SinkActions) :-
+	player_tower(Player, Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
+	sinkable_tiles(X1, Y1, Sinks1), list_sinks(Sinks1, SinkActions1),
+	sinkable_tiles(X2, Y2, Sinks2), list_sinks(Sinks2, SinkActions2),
+	append(SinkActions1, SinkActions2, SinkActions).
 list_sinks([],[]).
 list_sinks([[X,Y]|Tiles], [['sink',X,Y]|SinkList]) :- list_sinks(Tiles, SinkList).
 
@@ -489,8 +523,7 @@ winning_criteria(Score) :- Score is 0.
 							
 
 bot_pick_colour(Colour) :- evaluate_board('white', Score), bot_pick_colour_aux(Score, Colour).
-bot_pick_colour_aux(Score, Colour) :- Score < 0, Colour = 'black'.
-bot_pick_colour_aux(_, Colour) :- Colour = 'white'.
+bot_pick_colour_aux(Score, Colour) :- (Score < 0 -> Colour = 'black'; Colour = 'white').
 							
 bot_action(0, Player, Action) :- available_actions(Player, Actions), length(Actions, Length),
  random(0, Length, Index), nth0(Index,Actions, Action).
@@ -504,19 +537,17 @@ evaluate_action(Player, Action, Score),
 bot_action_helper(Player, Actions, NScore, NAction, SelectedAction).
 
 evaluate_action(Player, ['pass'], Score) :-
-evaluate_board(Player, Score).
+	number_pass(Player, NumPass), N is NumPass + 1, set_pass(Player, N),
+	evaluate_board(Player, Score), set_pass(Player, NumPass).
 
 evaluate_action(Player, ['move', X, Y, NX, NY], Score) :-
-player_tower(Player, Tower), remove_tower(X, Y), insert_tower(NX, NY, Tower),
-evaluate_board(Player, Score),
-remove_tower(NX, NY), insert_tower(X, Y, Tower).
+	player_tower(Player, Tower), remove_tower(X, Y), insert_tower(NX, NY, Tower),
+	evaluate_board(Player, Score), remove_tower(NX, NY), insert_tower(X, Y, Tower).
 	
 evaluate_action(Player, ['slide', X, Y, NX, NY], Score) :-
-board_cell(X, Y, Cell), remove_tile(X,Y), add_tile(NX, NY, Cell),
-evaluate_board(Player, Score),
-remove_tile(NX, NY), add_tile(X, Y, Cell).
+	board_cell(X, Y, Cell), remove_tile(X,Y), add_tile(NX, NY, Cell),
+	evaluate_board(Player, Score), remove_tile(NX, NY), add_tile(X, Y, Cell).
 	
 evaluate_action(Player, ['sink', X, Y], Score) :-
-board_cell(X, Y, Cell), remove_tile(X, Y),
-evaluate_board(Player, Score),
-add_tile(X, Y, Cell).
+	board_cell(X, Y, Cell), remove_tile(X, Y),
+	evaluate_board(Player, Score), add_tile(X, Y, Cell).
