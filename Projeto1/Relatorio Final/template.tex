@@ -365,7 +365,6 @@ A figura \ref{fig:makeplay} mostra um exemplo de um jogador a realizar uma jogad
 
 \subsection{Avaliação do Tabuleiro}
 \label{boardeval}
-
 A avaliação do tabuleiro é feita recorrendo ao seguinte predicado:
 
 \begin{lstlisting}
@@ -445,7 +444,7 @@ Se este predicado suceder, então o vencedor estará em Winner. Caso contrário,
 
 \subsection{Jogada do Computador}
 
-O computador tem dois modos possíveis de funcionamento: um modo fácil e um modo difícil. No modo fácil, ele simplesmente escolhe uma jogada aleatoriamente, não se preocupando se a jogada é prejudicial ou não. No modo difícil, o computador avalia os critérios descritos na secção \ref{boardeval} para cada jogada possível, e escolhe a jogada que lhe permite obter um tabuleiro mais benéfico.
+O computador tem dois modos possíveis de funcionamento: um modo fácil e um modo difícil. No modo fácil, ele simplesmente escolhe uma jogada aleatoriamente, não se preocupando se a jogada é prejudicial ou não. No modo difícil, o computador avalia os critérios descritos na secção \ref{boardeval} para cada jogada possível, e escolhe a jogada que lhe permite obter um tabuleiro mais benéfico. Tendo em conta a complexidade do nosso jogo, tornou-se impossível ir além de uma avaliação ao estado atual do tabuleiro, visto que isso significaria que o cálculo demoraria demasiado tempo e não seria feito em tempo útil.
 
 O predicado que determina a jogada do computador é o seguinte:
 

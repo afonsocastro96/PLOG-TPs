@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.10.7)  8 NOV 2015 03:08
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.10.7)  8 NOV 2015 14:41
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -709,7 +709,7 @@ Package pdftex.def Info: makeplay.png used on input line 361.
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 [11 <./outputboard.png (PNG copy)>] [12 <./makeplay.png>]
-Overfull \hbox (4.99123pt too wide) in paragraph at lines 444--445
+Overfull \hbox (4.99123pt too wide) in paragraph at lines 443--444
 []\OT1/cmr/m/n/10 Se este pre-di-cado su-ce-der, ent~ao o ven-ce-dor es-tar^^Sa
  em Win-ner. Caso contr^^Sario,
  []
@@ -717,25 +717,25 @@ Overfull \hbox (4.99123pt too wide) in paragraph at lines 444--445
 [13] <startgame.png, id=75, 645.41125pt x 52.195pt>
 File: startgame.png Graphic file (type png)
  <use startgame.png>
-Package pdftex.def Info: startgame.png used on input line 465.
+Package pdftex.def Info: startgame.png used on input line 464.
 (pdftex.def)             Requested size: 322.70483pt x 26.09743pt.
 
 <botdifficulty.png, id=76, 644.4075pt x 69.25874pt>
 File: botdifficulty.png Graphic file (type png)
  <use botdifficulty.png>
-Package pdftex.def Info: botdifficulty.png used on input line 474.
+Package pdftex.def Info: botdifficulty.png used on input line 473.
 (pdftex.def)             Requested size: 322.20296pt x 34.62927pt.
 
 <pickboard.png, id=77, 644.4075pt x 119.44624pt>
 File: pickboard.png Graphic file (type png)
  <use pickboard.png>
-Package pdftex.def Info: pickboard.png used on input line 483.
+Package pdftex.def Info: pickboard.png used on input line 482.
 (pdftex.def)             Requested size: 322.20296pt x 59.72296pt.
 
 <picktower.png, id=78, 642.4pt x 313.17pt>
 File: picktower.png Graphic file (type png)
  <use picktower.png>
-Package pdftex.def Info: picktower.png used on input line 492.
+Package pdftex.def Info: picktower.png used on input line 491.
 (pdftex.def)             Requested size: 321.19922pt x 156.58461pt.
 
 
@@ -744,7 +744,7 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 <playtime.png, id=79, 645.41125pt x 308.15125pt>
 File: playtime.png Graphic file (type png)
  <use playtime.png>
-Package pdftex.def Info: playtime.png used on input line 501.
+Package pdftex.def Info: playtime.png used on input line 500.
 (pdftex.def)             Requested size: 322.70483pt x 154.07524pt.
 
 
@@ -753,7 +753,7 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 <playmade.png, id=80, 644.4075pt x 209.78375pt>
 File: playmade.png Graphic file (type png)
  <use playmade.png>
-Package pdftex.def Info: playmade.png used on input line 510.
+Package pdftex.def Info: playmade.png used on input line 509.
 (pdftex.def)             Requested size: 322.20296pt x 104.8916pt.
 
 
@@ -762,14 +762,14 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 <gameend.jpg, id=81, 645.41125pt x 360.34625pt>
 File: gameend.jpg Graphic file (type jpg)
  <use gameend.jpg>
-Package pdftex.def Info: gameend.jpg used on input line 519.
+Package pdftex.def Info: gameend.jpg used on input line 518.
 (pdftex.def)             Requested size: 322.70483pt x 180.17268pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 [14 <./startgame.png> <./botdifficulty.png> <./pickboard.png>]
-Overfull \hbox (1.83289pt too wide) in paragraph at lines 528--529
+Overfull \hbox (1.83289pt too wide) in paragraph at lines 527--528
 []\OT1/cmr/m/n/10 O jogo exi-giu ao grupo bas-tante tempo e de-dica^^Xc~ao para
  a sua im-ple-menta^^Xc~ao.
  []
@@ -801,7 +801,7 @@ LaTeX Font Info:    Font shape `OMS/cmr/m/it' in size <10> not available
 Here is how much of TeX's memory you used:
  5565 strings out of 493304
  76341 string characters out of 6139871
- 366123 words of memory out of 5000000
+ 365123 words of memory out of 5000000
  8918 multiletter control sequences out of 15000+600000
  9975 words of font info for 36 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
@@ -816,7 +816,7 @@ re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texl
 ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist
 /fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on template.pdf (36 pages, 639169 bytes).
+Output written on template.pdf (36 pages, 639376 bytes).
 PDF statistics:
  188 PDF objects out of 1000 (max. 8388607)
  111 compressed objects within 2 object streams
