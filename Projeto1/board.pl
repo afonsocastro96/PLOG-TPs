@@ -450,24 +450,28 @@ pass_actions(_, [['pass']]).
 
 move_actions('white', MoveActions) :-
 	player_tower('white', Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
-	light_island(X1,Y1,LightIsland1), circle_island(X1,Y1,CircleIsland1),
-	append(LightIsland1, CircleIsland1, Island1), list_moves(X1, Y1, Island1, MoveActions1),
-	light_island(X2,Y2,LightIsland2), circle_island(X2,Y2,CircleIsland2),
-	append(LightIsland2, CircleIsland2, Island2), list_moves(X2, Y2, Island2, MoveActions2),
+	light_island(X1,Y1,LightIsland1), remove_invalid_moves(X1, Y1, LightIsland1, LightCells1),
+	circle_island(X1,Y1,CircleIsland1), remove_invalid_moves(X1, Y1, CircleIsland1, CircleCells1),
+	append(LightCells1, CircleCells1, Island1), list_moves(X1, Y1, Island1, MoveActions1),
+	light_island(X2,Y2,LightIsland2), remove_invalid_moves(X2, Y2, LightIsland2, LightCells2),
+	circle_island(X2,Y2,CircleIsland2), remove_invalid_moves(X2, Y2, CircleIsland2, CircleCells2),
+	append(LightCells2, CircleCells2, Island2), list_moves(X2, Y2, Island2, MoveActions2),
 	append(MoveActions1, MoveActions2, MoveActions).
 move_actions('black', MoveActions) :-
 	player_tower('black', Tower), tower_positions(Tower, [[X1,Y1],[X2,Y2]]), !,
-	dark_island(X1,Y1,DarkIsland1), square_island(X1,Y1,SquareIsland1),
-	append(DarkIsland1, SquareIsland1, Island1), list_moves(X1, Y1, Island1, MoveActions1),
-	dark_island(X2,Y2,DarkIsland2), square_island(X2,Y2,SquareIsland2),
-	append(DarkIsland2, SquareIsland2, Island2), list_moves(X2, Y2, Island2, MoveActions2),
+	dark_island(X1,Y1,DarkIsland1), remove_invalid_moves(X1, Y1, DarkIsland1, DarkCells1),
+	square_island(X1,Y1,SquareIsland1), remove_invalid_moves(X1, Y1, SquareIsland1, SquareCells1),
+	append(DarkCells1, SquareCells1, Island1), list_moves(X1, Y1, Island1, MoveActions1),
+	dark_island(X2,Y2,DarkIsland2), remove_invalid_moves(X2, Y2, DarkIsland2, DarkCells2),
+	square_island(X2,Y2,SquareIsland2), remove_invalid_moves(X2, Y2, SquareIsland2, SquareCells2),
+	append(DarkCells2, SquareCells2, Island2), list_moves(X2, Y2, Island2, MoveActions2),
 	append(MoveActions1, MoveActions2, MoveActions).
 remove_invalid_moves(_, _, [], []).
 remove_invalid_moves(StartX, StartY, [[StartX, StartY]|T], T1) :-
 	!, remove_invalid_moves(StartX, StartY, T, T1).
-remove_invalid_moves(StartX, StartY, [[X, Y]|T], T1) :-
+remove_invalid_moves(StartX, StartY, [[X, Y]|T], [[X,Y]|T1]) :-
 	board_cell(X, Y, [' ',_,_]), !, remove_invalid_moves(StartX, StartY, T, T1).
-remove_invalid_moves(StartX, StartY, [[X, Y]|T], [[X, Y]|T1]) :-
+remove_invalid_moves(StartX, StartY, [[X, Y]|T], T1) :-
 	!, remove_invalid_moves(StartX, StartY, T, T1).
 list_moves(_, _, [], []).
 list_moves(StartX, StartY, [[X, Y]|EndList], [['move',StartX,StartY,X,Y]|MoveList]) :-
