@@ -56,20 +56,19 @@ remove_tower(X,Y) :- board_cell(X,Y,[Tower,Colour,Shape]), Tower \= ' ', change_
 
 %Start game
 start_game :- pick_play_mode.
-pick_play_mode :- write('Please state the desired play mode (1- Player vs Computer 2- Player vs Player)'), read(Mode), test_mode(Mode).
+pick_play_mode :- write('Please state the desired play mode (1- Player vs Computer 2- Player vs Player 3- Computer vs Computer): '), read(Mode), test_mode(Mode).
 test_mode(1) :- game_cvp.
 test_mode(2) :- game_pvp.
+test_mode(3) :- game_cvc.
 test_mode(_) :- nl, write('Invalid mode!'), nl, pick_play_mode.
 game_pvp :- once(ask_board), once(pick_towers), !, pick_colour, game_cycle(Winner), end_game(Winner).
 game_cvp :- once(ask_board), once(pick_towers), !, bot_pick_colour(Colour), assert(bot_colour(Colour)), nl, write('Bot picked the '), write(Colour), write(' colour'), nl, game_cycle_cvp(Winner), end_game(Winner).
+game_cvc :- once(ask_board), once(randomize_towers), !, game_cycle_cvc(Winner), end_game(Winner). 
 
 %Creates the chosen board.
 create_board(minor) :- create_database(5), randomize_board_minor.
 create_board(major) :- create_database(7), randomize_board_major.
 create_board(_) :- write('Invalid type of board!'), nl, ask_board.
-
-%Randomize board
-randomize(N) :- random(0,4,N).
 
 /****************
 
@@ -152,6 +151,9 @@ replace_board(X1,Y1,X2,Y2,1) :- change_tile(X1,Y1,[' ','P','C']), change_tile(X2
 replace_board(X1,Y1,X2,Y2,2) :- change_tile(X1,Y1,[' ','B','Q']), change_tile(X2,Y2,[' ','P','C']).
 replace_board(X1,Y1,X2,Y2,3) :- change_tile(X1,Y1,[' ','P','Q']), change_tile(X2,Y2,[' ','B','C']).
 
+%Randomize board
+randomize(N) :- random(0,4,N).
+
 %Asks the type of board
 ask_board :- write('Please state the board you want (major/minor): '), read(X), create_board(X), !.
 
@@ -184,21 +186,30 @@ pick_tower2 :- write('Invalid tower placement!'), nl, pick_tower2.
 pick_tower3 :- display_board,
 	write('Player 1: State the vertical coordinate of the first black tower: (Ex: a.)'), read(Character),
 	write('State the horizontal coordinate of the first black tower: (Ex: 1.)'), read(Number),
-	validate_pick_tower3(Character, Number, X, Y), insert_tower(X, Y, 'T'), !.
+	validate_pick_tower(Character, Number, X, Y), insert_tower(X, Y, 'T'), !.
 pick_tower3 :- write('Invalid tower placement!'), nl, pick_tower3.
 
 pick_tower4 :- display_board,
 	write('Player 1: State the vertical coordinate of the second black tower: (Ex: a.)'), read(Character),
 	write('State the horizontal coordinate of the second black tower: (Ex: 1.)'), read(Number),
-	validate_pick_tower4(Character, Number, X, Y), insert_tower(X, Y, 'T'), !.
+	validate_pick_tower(Character, Number, X, Y), insert_tower(X, Y, 'T'), !.
 pick_tower4 :- write('Invalid tower placement!'), nl, pick_tower4.
 
-% Player two picks the colour
+% Player 2 picks the colour
 pick_colour :- display_board, write('Player 2: Choose your colour. From now on you will be identified with your colour (white/black): '), read(Colour), colour_picked(Colour).
+
+%Random tower picker for the cvc mode.
+randomize_towers :- board_length(Length), randomize_light_tower_1(Length), randomize_light_tower_2(Length), randomize_dark_tower_1(Length), randomize_dark_tower_2(Length).
+randomize_light_tower_1(Length) :- repeat, random(0,Length, XIndex), random(0,Length, YIndex), insert_tower(XIndex,YIndex,'L').
+randomize_light_tower_2(Length) :- repeat, random(0,Length, XIndex), random(0,Length, YIndex), insert_tower(XIndex,YIndex,'L').
+randomize_dark_tower_1(Length) :- repeat, random(0,Length, XIndex), random(0,Length, YIndex), insert_tower(XIndex,YIndex,'T').
+randomize_dark_tower_2(Length) :- repeat, random(0,Length, XIndex), random(0,Length, YIndex), insert_tower(XIndex,YIndex,'T').
+
 
 % Game cycle
 game_cycle(Winner) :- repeat, once(make_play), check_winning_condition(Winner).
 game_cycle_cvp(Winner) :- repeat, once(make_play_cvp), check_winning_condition(Winner).
+game_cycle_cvc(Winner) :- repeat, once(make_play_cvc), check_winning_condition(Winner).
 
 % Play time!
 colour_picked('white') :- write('White: Your turn to play\n'), display_board. 
@@ -218,11 +229,16 @@ make_play_aux(_) :- write('Invalid move!'), nl, nl.
 make_play_cvp :- current_player(Player), bot_colour(Player), make_bot_play(Player).
 make_play_cvp :- current_player(Player), \+ bot_colour(Player), make_play.
 
+make_play_cvc :- current_player(Player), display_board, write(Player), write(': '), make_bot_play(Player).
+
 make_bot_play(Player) :- bot_action(1, Player, Action), make_bot_move(Action).
-make_bot_move(['move',StartX,StartY,X,Y]) :- move_tower_aux(StartX,StartY,X,Y).
+make_bot_move(['move',StartX,StartY,X,Y]) :- move_tower_aux(StartX,StartY,X,Y), nl, nl, write('The bot moved a tower from '), print_bot_play_coordinates(StartX, StartY), write(' to '),  print_bot_play_coordinates(X, Y), nl, nl.
 make_bot_move(['pass']) :- pass.
-make_bot_move(['slide',StartX, StartY, X, Y]) :- slide_tile_aux(StartX,StartY,X,Y).
-make_bot_move(['sink',X,Y]) :- sink_tile_aux(X,Y).
+make_bot_move(['slide',StartX, StartY, X, Y]) :- slide_tile_aux(StartX,StartY,X,Y), nl, nl, write('The bot slided a tile from '), print_bot_play_coordinates(StartX, StartY), write(' to '),  print_bot_play_coordinates(X, Y), nl, nl.
+make_bot_move(['sink',X,Y]) :- sink_tile_aux(X,Y), nl, nl, write('The bot sinked a tile in '), print_bot_play_coordinates(X, Y), nl, nl.
+
+% Prints on screen coordinates with the format (Character,Number)
+print_bot_play_coordinates(X, Y) :- Charcode is 97 + X, char_code(Character, Charcode), Number is Y + 1, write('('), write(Character), write(' '), write(Number), write(')').
 
 % Treat each play individually
 slide_tile :- 	write('\nState the vertical coordinate of the tile you want to slide: (Ex: a.)'), read(Character),
