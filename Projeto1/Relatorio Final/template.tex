@@ -458,10 +458,72 @@ Em que Difficulty é 0 se for o modo fácil e 1 se for o modo difícil, player �
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Interface com o Utilizador}
 
-Descrever o módulo de interface com o utilizador em modo de texto.
+A interface com o utilizador foi feita de forma simples, mas intuitiva e eficaz. O utilizador, quando inicia o jogo, deve escolher se quer jogar em modo jogador vs jogador, jogador vs computador, ou computador vs computador. A figura \ref{fig:startgame} mostra a mensagem mostrada ao utilizador que representa isto mesmo.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{startgame.png}
+\caption{Menu de escolha de tipo de jogador}
+\label{fig:startgame}
+\end{figure}
+
+Se o utilizador escolher um modo de jogo que envolva o computador, é depois convidado a escolher a dificuldade do bot: modo fácil ou difícil, tal como se pode ver na figura \ref{fig:botdifficulty}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{botdifficulty.png}
+\caption{Menu de escolha de dificuldade do bot}
+\label{fig:botdifficulty}
+\end{figure}
+
+Depois, independentemente do modo escolhido, o utilizador decide se quer um tabuleiro do tipo Syrtis Major ou Syrtis Minor (figura \ref{fig:pickboard}).
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{pickboard.png}
+\caption{Menu de escolha de tipo de tabuleiro}
+\label{fig:pickboard}
+\end{figure}
+
+Depois, se o utilizador tiver escolhido um modo de jogo que envolva pelo menos um jogador, este irá escolher a posição das torres, tal como se pode ver na figura \ref{fig:picktowers}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{picktower.png}
+\caption{Menu de colocação das torres}
+\label{fig:picktowers}
+\end{figure}
+
+Depois de estarem escolhidas, se o modo de jogo escolhido for jogador vs jogador, o outro jogador escolherá a sua cor. No caso de ser jogador vs computador, o computador escolherá a sua cor. Depois disso, o jogo começa. A figura \ref{fig:playtime} mostra a mensagem mostrada ao utilizador no momento da sua jogada.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{playtime.png}
+\caption{Menu de jogo}
+\label{fig:playtime}
+\end{figure}
+
+O jogador poderá então escolher qual das 4 jogadas possíveis quer. Depois de escolhida, deverá dar as coordenadas necessárias à sua jogada, como mostrado na figura \ref{fig:playmade}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{playmade.png}
+\caption{Jogada prestes a ser feita}
+\label{fig:playmade}
+\end{figure}
+
+Depois, cada jogador (ou computador) fará sucessivamente as suas jogadas, até que eventualmente algum jogador irá ganhar. Quando isto acontece, uma mensagem é mostrada no ecrã a informar o vencedor, e o jogo acaba, tal como se pode ver na figura \ref{fig:endgame}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{gameend.jpg}
+\caption{Fim do jogo}
+\label{fig:endgame}
+\end{figure}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \section{Conclusões}
 O jogo exigiu ao grupo bastante tempo e dedicação para a sua implementação. No entanto, estávamos cientes, quando o escolhemos, de que assim seria, pois era para nós bastante claro que era um dos jogos mais complexos da lista disponibilizada pelos professores, pelo que isto não nos surpreendeu.
 

@@ -29,6 +29,6 @@
 \contentsline {subsection}{\numberline {3.6}Final do Jogo}{13}
 \contentsline {subsection}{\numberline {3.7}Jogada do Computador}{13}
 \contentsline {section}{\numberline {4}Interface com o Utilizador}{14}
-\contentsline {section}{\numberline {5}Conclus\IeC {\~o}es}{14}
-\contentsline {section}{Bibliografia}{15}
-\contentsline {section}{\numberline {A}C\IeC {\'o}digo Fonte}{15}
+\contentsline {section}{\numberline {5}Conclus\IeC {\~o}es}{15}
+\contentsline {section}{Bibliografia}{17}
+\contentsline {section}{\numberline {A}C\IeC {\'o}digo Fonte}{17}
