@@ -11,6 +11,7 @@
 :- dynamic number_whites/1.
 :- dynamic number_pass/2.
 :- dynamic bot_colour/1.
+:- dynamic win_condition/1.
 
 %Database manipulation
 purge_database(N) :-	N > 0, purge_database_aux(0,0), retract(board_length(N)), retract(sink_streak(_,_)), retract(current_player(_)),
@@ -62,8 +63,8 @@ test_mode(2) :- game_pvp.
 test_mode(3) :- game_cvc.
 test_mode(_) :- nl, write('Invalid mode!'), nl, pick_play_mode.
 game_pvp :- once(ask_board), once(pick_towers), !, pick_colour, game_cycle(Winner), end_game(Winner).
-game_cvp :- once(ask_board), once(pick_towers), !, bot_pick_colour(Colour), assert(bot_colour(Colour)), nl, write('Bot picked the '), write(Colour), write(' colour'), nl, game_cycle_cvp(Winner), end_game(Winner).
-game_cvc :- once(ask_board), once(randomize_towers), !, game_cycle_cvc(Winner), end_game(Winner). 
+game_cvp :- once(ask_bot_difficulty(BotDifficulty)), once(ask_board), once(pick_towers), !, bot_pick_colour(BotDifficulty, Colour), assert(bot_colour(Colour)), nl, write('Bot picked the '), write(Colour), write(' colour'), nl, game_cycle_cvp(BotDifficulty, Winner), end_game(Winner).
+game_cvc :- once(ask_bot_difficulty(BotDifficulty)), once(ask_board), once(randomize_towers), !, game_cycle_cvc(BotDifficulty, Winner), end_game(Winner). 
 
 %Creates the chosen board.
 create_board(minor) :- create_database(5), randomize_board_minor.
@@ -157,6 +158,12 @@ randomize(N) :- random(0,4,N).
 %Asks the type of board
 ask_board :- write('Please state the board you want (major/minor): '), read(X), create_board(X), !.
 
+%Asks the bot difficulty
+validate_bot_difficulty(0).
+validate_bot_difficulty(1).
+validate_bot_difficulty(_) :- nl, write('Invalid difficulty'), nl, ask_bot_difficulty(_).
+ask_bot_difficulty(X) :- nl, write('Please state the bot difficulty you want (0: easy/1: difficult)'), read(X), validate_bot_difficulty(X), nl, !.
+
 %After a winner is found, end the game
 end_game(Winner) :- nl, write('Player '), write(Winner), write(' has won the game!'), board_length(Length), purge_database(Length).
 
@@ -205,11 +212,10 @@ randomize_light_tower_2(Length) :- repeat, random(0,Length, XIndex), random(0,Le
 randomize_dark_tower_1(Length) :- repeat, random(0,Length, XIndex), random(0,Length, YIndex), insert_tower(XIndex,YIndex,'T').
 randomize_dark_tower_2(Length) :- repeat, random(0,Length, XIndex), random(0,Length, YIndex), insert_tower(XIndex,YIndex,'T').
 
-
 % Game cycle
-game_cycle(Winner) :- repeat, once(make_play), check_winning_condition(Winner).
-game_cycle_cvp(Winner) :- repeat, once(make_play_cvp), check_winning_condition(Winner).
-game_cycle_cvc(Winner) :- repeat, once(make_play_cvc), check_winning_condition(Winner).
+game_cycle(Winner) :- repeat, once(make_play), check_winning_condition(Winner), win_condition(WC), write(WC), nl.
+game_cycle_cvp(BotDifficulty, Winner) :- repeat, once(make_play_cvp(BotDifficulty)), check_winning_condition(Winner), win_condition(WC), write(WC), nl.
+game_cycle_cvc(BotDifficulty, Winner) :- repeat, once(make_play_cvc(BotDifficulty)), check_winning_condition(Winner), win_condition(WC), write(WC), nl.
 
 % Play time!
 colour_picked('white') :- write('White: Your turn to play\n'), display_board. 
@@ -218,7 +224,6 @@ colour_picked('black') :- write('White: Your turn to play\n'), display_board.
 colour_picked('b') :- write('White: Your turn to play\n'), display_board. 
 
 % Make play
-
 make_play :- display_board, current_player(Player), write(Player), write(': Your turn to play'), nl, write('Make your move (slide/sink/movetower/pass): '), read(Move), make_play_aux(Move).
 make_play_aux(Move) :- Move == 'sink', sink_tile.
 make_play_aux(Move) :- Move == 'movetower', move_tower.
@@ -226,19 +231,20 @@ make_play_aux(Move) :- Move == 'slide', slide_tile.
 make_play_aux(Move) :- Move == 'pass', pass.
 make_play_aux(_) :- write('Invalid move!'), nl, nl.
 
-make_play_cvp :- current_player(Player), bot_colour(Player), make_bot_play(Player).
-make_play_cvp :- current_player(Player), \+ bot_colour(Player), make_play.
+make_play_cvp(BotDifficulty) :- current_player(Player), bot_colour(Player), make_bot_play(BotDifficulty, Player).
+make_play_cvp(_) :- current_player(Player), \+ bot_colour(Player), make_play.
 
-make_play_cvc :- current_player(Player), display_board, write(Player), write(': '), make_bot_play(Player).
+make_play_cvc(BotDifficulty) :- current_player(Player), display_board, write(Player), write(': '), nl, make_bot_play(BotDifficulty, Player).
 
-make_bot_play(Player) :- bot_action(1, Player, Action), make_bot_move(Action).
-make_bot_move(['move',StartX,StartY,X,Y]) :- move_tower_aux(StartX,StartY,X,Y), nl, nl, write('The bot moved a tower from '), print_bot_play_coordinates(StartX, StartY), write(' to '),  print_bot_play_coordinates(X, Y), nl, nl.
+make_bot_play(0, Player) :- bot_action(0, Player, Action), make_bot_move(Action).
+make_bot_play(1, Player) :- bot_action(1, Player, Action), make_bot_move(Action).
+make_bot_move(['move',StartX,StartY,X,Y]) :- move_tower_aux(StartX,StartY,X,Y), write('The bot moved a tower from '), print_bot_play_coordinates(StartX, StartY), write(' to '),  print_bot_play_coordinates(X, Y), nl, nl.
 make_bot_move(['pass']) :- pass.
-make_bot_move(['slide',StartX, StartY, X, Y]) :- slide_tile_aux(StartX,StartY,X,Y), nl, nl, write('The bot slided a tile from '), print_bot_play_coordinates(StartX, StartY), write(' to '),  print_bot_play_coordinates(X, Y), nl, nl.
-make_bot_move(['sink',X,Y]) :- sink_tile_aux(X,Y), nl, nl, write('The bot sinked a tile in '), print_bot_play_coordinates(X, Y), nl, nl.
+make_bot_move(['slide',StartX, StartY, X, Y]) :- slide_tile_aux(StartX,StartY,X,Y), write('The bot slided a tile from '), print_bot_play_coordinates(StartX, StartY), write(' to '),  print_bot_play_coordinates(X, Y), nl, nl.
+make_bot_move(['sink',X,Y]) :- sink_tile_aux(X,Y), write('The bot sinked a tile in '), print_bot_play_coordinates(X, Y), nl, nl.
 
 % Prints on screen coordinates with the format (Character,Number)
-print_bot_play_coordinates(X, Y) :- Charcode is 97 + X, char_code(Character, Charcode), Number is Y + 1, write('('), write(Character), write(' '), write(Number), write(')').
+print_bot_play_coordinates(X, Y) :- Charcode is 97 + Y, char_code(Character, Charcode), Number is X + 1, write('('), write(Character), write(' '), write(Number), write(')').
 
 % Treat each play individually
 slide_tile :- 	write('\nState the vertical coordinate of the tile you want to slide: (Ex: a.)'), read(Character),
@@ -274,11 +280,11 @@ player_tower('white', 'L').
 player_tower('black', 'T').
 
 % Check end game condition
-check_winning_condition(Winner) :- sink_streak(Winner, 4).
-check_winning_condition(Winner) :- completed_island(Player1), completed_island(Player2), Player1 \= Player2, !, resolve_initiative(Winner).
-check_winning_condition(Winner) :- completed_island(Winner), !.
-check_winning_condition(Winner) :- number_pass(Player1, 1), number_pass(Player2, 1), Player1 \= Player2, !, resolve_initiative(Winner).
-check_winning_condition(Winner) :- number_pass(_, 4), number_pass(Winner, 0), !. 
+check_winning_condition(Winner) :- sink_streak(Winner, 4), assert(win_condition('quicksand')).
+check_winning_condition(Winner) :- completed_island(Player1), completed_island(Player2), Player1 \= Player2, !, resolve_initiative(Winner), assert(win_condition('initiative')).
+check_winning_condition(Winner) :- completed_island(Winner), assert(win_condition('completed_island')), !.
+check_winning_condition(Winner) :- number_pass(Player1, 1), number_pass(Player2, 1), Player1 \= Player2, !, resolve_initiative(Winner), assert(win_condition('initiative')).
+check_winning_condition(Winner) :- number_pass(_, 4), number_pass(Winner, 0), assert(win_condition('four_passes')), !. 
 
 completed_island('white') :- completed_light_island.
 completed_island('white') :- completed_circle_island.
@@ -557,8 +563,8 @@ winning_criteria(Score) :- check_winning_condition(Winner), !,
 (Winner = 'white' -> Score is 10000; Score is -10000).
 winning_criteria(Score) :- Score is 0.
 							
-
-bot_pick_colour(Colour) :- evaluate_board('white', Score), bot_pick_colour_aux(Score, Colour).
+bot_pick_colour(0,Colour) :- (random(0,2,0) -> Colour = 'black'; Colour = 'white').
+bot_pick_colour(1,Colour) :- evaluate_board('white', Score), bot_pick_colour_aux(Score, Colour).
 bot_pick_colour_aux(Score, Colour) :- (Score < 0 -> Colour = 'black'; Colour = 'white').
 							
 bot_action(0, Player, Action) :- available_actions(Player, Actions), length(Actions, Length),
