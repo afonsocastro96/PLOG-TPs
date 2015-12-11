@@ -1,0 +1,27 @@
+Domínio:
+	{0,1}
+
+Representação:
+	B -> Lista de listas com coordenadas dos quadrados de cada bloco
+	T -> Matriz N * M com a informação da cor do quadrado
+	V -> Matriz M * 2 (2 = Quadrados/Secções verticais)
+	H -> Matrix N * 2 (2 = Quadrados/Secções horizontais)
+
+	S= [ [[6,0], [7,0], [6,1], [6,2]], ... ]
+	T= [[1,1,1,1,0,1,1,0,1,0], ...]
+
+Condições:
+	A intersecção de duas listas L pertencentes a B é a lista vazia.
+	A reunião de todas as listas L pertencentes a B é a lista representante do domínio {x, y}, x € {0, N-1}, y € {0, M-1}.
+	O número de quadrados em V tem de ser menor ou igual a M-(NSeccoes - 1) e superior ou igual a 0.
+	O número de quadrados em H tem de ser menor ou igual a N-(NSeccoes - 1) e superior ou igual a 0.
+	O número de secções em V tem de ser menor ou igual a M / 2 e superior ou igual a 0.
+	O número de secções em H tem de ser menor ou igual a M / 2 e superior ou igual a 0.
+
+Restrições:
+	Para cada elemento pertencente ao mesmo bloco, a sua cor tem de ser igual
+	O numero de quadrados pretos da coluna C tem de ser igual a V[C][0]
+	O numero de blocos pretos da coluna C tem de ser igual a V[C][1]
+	O numero de quadrados pretos da linha L tem de ser igual a V[H][0]
+	O numero de blocos pretos da linha L tem de ser igual a V[H][1]
+
