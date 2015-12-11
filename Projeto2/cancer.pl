@@ -13,7 +13,23 @@ groupsWithSameColour(HP, VP, T) :-
 	groupsWithSameColourHorizontal(HP, T),
 	groupsWithSameColourVertical(VP, T).
 
+groupsWithSameColourVertical(VP, T) :-
+	transpose(T, TT),
+	groupsWithSameColourHorizontal(VP, TT).
+	
+groupsWithSameColourHorizontal([],[]).
+groupsWithSameColourHorizontal([HRowWalls|HRowsWalls],[Row|Rows]) :-
+	checkWalls(HRowWalls, Row),
+	groupsWithSameColourHorizontal(HRowsWalls, Rows).
+	
+checkWalls([], [_]). /* Last elem */
+checkWalls([HWall|HWalls], [Elem1,Elem2|Elems]) :-
+	checkWall(HWall, Elem1, Elem2),
+	checkWalls(HWalls, [Elem2|Elems]).
 
+checkWall(0, Elem1, Elem2) :-
+	Elem1 #= Elem2.
+checkWall(1, Elem1, Elem2).
 
 get_colour(T, Row, Col, Colour) :- nth0(Row, T, Elem), nth0(Col, Elem, Colour).
 
@@ -24,7 +40,7 @@ horizontalRule([], []).
 horizontalRule([Row|Rows],[Rule|Rules]) :-
 	validate_row(Row, Rule), horizontalRule([Rows|Rules]).
 
-validate_row(Row, [PaintedSquares|NumberSections])
+validate_row(Row, [PaintedSquares|NumberSections]) :-
 	check_row_painted_squares(Row, PaintedSquares),
 	check_row_sections(Row, NumberSections).
 
