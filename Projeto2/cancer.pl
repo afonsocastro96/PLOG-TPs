@@ -1,5 +1,6 @@
 :- use_module(library(clpfd)).
 :- use_module(library(lists)).
+:- use_module(library(random)).
 
 horizontalWall(Walls) :- Walls = [[0,1,1,0,1,1,0,1,1],
 								[0,1,1,1,1,1,1,1,1],
@@ -59,7 +60,8 @@ doubleCrossAPix(HP, VP, T, V, H) :-
 	groupsWithSameColour(HP,VP,T),
 	horizontalRule(T,H),
 	verticalRule(T,V),
-	labeling([ff,enum],Var).
+	labeling([ff,enum],Var),
+	print_solution(T).
 
 /* Para cada elemento pertencente ao mesmo bloco, a sua cor tem de ser igual  */
 
@@ -126,3 +128,51 @@ check_row_sections_aux([Elem|Row], _,CurrentNumberSections, NumberSections) :-
 
 verticalRule(Rows, Rules) :-
 	transpose(Rows, Cols), horizontalRule(Cols, Rules).
+
+/* Imprimir solucao em formato legivel */
+
+print_solution(T) :- write('Solution:'), nl, nl, print_solution_aux(T), nl.
+print_solution_aux([]).
+print_solution_aux([Row|Rows]) :- print_row(Row), nl, print_solution_aux(Rows).
+
+print_row([]).
+print_row([0|Row]) :- write('  '), print_row(Row).
+print_row([1|Row]) :- write('+ '), print_row(Row).
+
+/* Gerar um tabuleiro aleatorio */
+
+/* Gerar uma matriz de informacoes referentes as paredes de tamanho M*N*/
+generate_board(_,0,[]).
+generate_board(M,N,[Row|T]) :- generate_row(M,Row), X is N-1, generate_board(M,X,T).
+generate_row(0, []).
+generate_row(M,[Elem|Row]) :- X is M-1, random(0,2,Elem), generate_row(X, Row).
+
+/* Gerar as duas matrizes com informacao referente aos quadrados pintados / seccoes */
+
+get_horizontal_numbers([Row|Rows], [[PaintedSquares, NumberSections]|NumbersRows]) :- 
+	get_row_numbers(Row, PaintedSquares),
+	get_row_sections(Row, NumberSections),
+	get_horizontal_numbers(Rows, NumbersRows).
+
+get_row_numbers([], 0).
+get_row_numbers([0|Row], PaintedSquares) :- get_row_numbers(Row, PaintedSquares).
+get_row_numbers([1|Row], PaintedSquares) :- X is PaintedSquares - 1, get_row_numbers(Row, X).
+
+get_row_sections_aux([], _, N, N).
+get_row_sections_aux([1|Row], 0, CurrentNumberSections, NumberSections) :- 
+	N is CurrentNumberSections + 1,
+	get_row_sections_aux(Row, Elem, N, NumberSections). 
+get_row_sections_aux([Elem|Row], _,CurrentNumberSections, NumberSections) :- 
+	get_row_sections_aux(Row, Elem, CurrentNumberSections, NumberSections).
+
+get_vertical_numbers(Rows, Rules) :-
+	transpose(Rows, Cols), get_horizontal_numbers(Cols, Rules).
+
+/* Gerar um tabuleiro aleatorio M por N */
+random_board(M, N, T) :-
+	generate_board(M, N, HP),
+	generate_board(M, N, VP),
+	get_horizontal_numbers(HP, H),
+	get_vertical_numbers(VP, V),
+	doubleCrossAPix(HP, VP, T, V, H),
+	print_solution(T).
