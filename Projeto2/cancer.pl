@@ -2,6 +2,15 @@
 :- use_module(library(lists)).
 :- use_module(library(random)).
 
+teste :-
+	horizontalWall(HP),
+	verticalWall(VP),
+	verticalNumbers(V),
+	horizontalNumbers(H),
+	length(V, NRows),
+	length(H, NCols),
+	doubleCrossAPix(HP, VP, NRows, NCols, V, H).
+
 horizontalWall(Walls) :- Walls = [[0,1,1,0,1,1,0,1,1],
 								[0,1,1,1,1,1,1,1,1],
 								[1,1,1,1,0,1,1,1,1],
@@ -55,13 +64,20 @@ var_table(M, N, T) :-
 	append([Row], T1, T).
 
 doubleCrossAPix(HP, VP, T, V, H) :-
+	doubleCrossAPixSolver(HP, VP, T, V, H),
+	print_solution(T).
+	
+doubleCrossAPix(HP, VP, NRows, NCols, V, H) :-
+	var_table(NRows, NCols, T),
+	doubleCrossAPix(HP, VP, T, V, H).
+
+doubleCrossAPixSolver(HP, VP, T, V, H) :-	
 	append(T, Var),
 	domain(Var, 0, 1),
 	groupsWithSameColour(HP,VP,T),
 	horizontalRule(T,H),
 	verticalRule(T,V),
-	labeling([ff,enum],Var),
-	print_solution(T).
+	labeling([ff,enum],Var).
 
 /* Para cada elemento pertencente ao mesmo bloco, a sua cor tem de ser igual  */
 
@@ -86,8 +102,6 @@ checkWalls([HWall|HWalls], [Elem1,Elem2|Elems]) :-
 checkWall(0, Elem1, Elem2) :-
 	Elem1 #= Elem2.
 checkWall(1, _, _).
-
-get_colour(T, Row, Col, Colour) :- nth0(Row, T, Elem), nth0(Col, Elem, Colour).
 
 /* O numero de quadrados pretos da coluna C tem de ser igual a V[C][0]
 	O numero de blocos pretos da coluna C tem de ser igual a V[C][1]  */
