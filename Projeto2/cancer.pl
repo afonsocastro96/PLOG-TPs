@@ -11,6 +11,22 @@ teste :-
 	length(H, NCols),
 	doubleCrossAPix(HP, VP, NRows, NCols, V, H).
 
+teste_print :-
+	horizontalWall(HP),
+	verticalWall(VP),
+	verticalNumbers(V),
+	horizontalNumbers(H),
+	print_white_puzzle(HP, VP, H, V).
+	
+test_generator(M, N) :-
+	game_generator(M, N, HP, VP, H, V),
+	print_white_puzzle(HP, VP, H, V).
+	
+test_generate_and_solve(M, N) :-
+	game_generator(M, N, HP, VP, H, V),
+	print_white_puzzle(HP, VP, H, V),
+	doubleCrossAPix(HP, VP, M, N, V, H).
+	
 horizontalWall(Walls) :- Walls = [[0,1,1,0,1,1,0,1,1],
 								[0,1,1,1,1,1,1,1,1],
 								[1,1,1,1,0,1,1,1,1],
@@ -66,7 +82,7 @@ var_table(M, N, T) :-
 
 doubleCrossAPix(HP, VP, T, V, H) :-
 	doubleCrossAPixSolver(HP, VP, T, V, H),
-	print_solution(T).
+	print_puzzle(HP, VP, T, H, V) .
 	
 doubleCrossAPix(HP, VP, NRows, NCols, V, H) :-
 	var_table(NRows, NCols, T),
@@ -145,14 +161,164 @@ verticalRule(Rows, Rules) :-
 	transpose(Rows, Cols), horizontalRule(Cols, Rules).
 
 /* Imprimir solucao em formato legivel */
+print_white_puzzle(HP, VP, H, V) :-
+	length(H, NumRows),
+	length(V, NumCols),
+	white_board(NumRows, NumCols, T),
+	print_puzzle(HP, VP, T, H, V).
 
-print_solution(T) :- write('Solution:'), nl, nl, print_solution_aux(T), nl.
-print_solution_aux([]).
-print_solution_aux([Row|Rows]) :- print_row(Row), nl, print_solution_aux(Rows).
+white_board(0, _, []).
+white_board(NumRows, NumCols, [Row|Rows]) :-
+	NumRows > 0,
+	white_row(NumCols, Row),
+	X is NumRows - 1,
+	white_board(X, NumCols, Rows).
+	
+white_row(0, []).
+white_row(NumCols, [0|Cols]) :-
+	NumCols > 0,
+	X is NumCols - 1,
+	white_row(X, Cols).
 
-print_row([]).
-print_row([0|Row]) :- write('  '), print_row(Row).
-print_row([1|Row]) :- write('+ '), print_row(Row).
+print_puzzle(HP, VP, T, H, V) :-
+	getSpacing(H, PaintedSpace, SectionsSpace),
+	Spacing is PaintedSpace + 1 + SectionsSpace,
+	length(V, NumCols),
+	print_vertical_rules(V, Spacing),
+	transpose(VP, VPT),
+	print_horizontal_border(Spacing, NumCols),
+	print_puzzle_aux(HP, VPT, T, H, PaintedSpace, SectionsSpace, Spacing).
+
+print_vertical_rules(V, Spacing) :-
+	getSpacing(V, PaintedSpace, SectionsSpace),
+	transpose(V, [Painted, Sections]),
+	print_vertical_numbers(Spacing, Painted, PaintedSpace),
+	length(Painted, NumCols),
+	print_division(Spacing, NumCols),
+	print_vertical_numbers(Spacing, Sections, SectionsSpace).
+	
+print_vertical_numbers(_, _, 0).
+	
+print_vertical_numbers(Spacing, Numbers, NumbersSpace) :-
+	print_spacing(Spacing),
+	N is NumbersSpace - 1,
+	print_vertical_numbers_aux(Numbers, N, Remainders),
+	print_vertical_numbers(Spacing, Remainders, N).
+	
+print_vertical_numbers_aux([], _, []) :-
+	write('\n').
+print_vertical_numbers_aux([Number|Numbers], N, [Remainder|Remainders]) :-
+	Digit is Number // 10 ^ N,
+	Remainder is Number rem 10 ^ N,
+	write(' '),
+	write(Digit),
+	print_vertical_numbers_aux(Numbers, N, Remainders).
+	
+print_division(Spacing, NumCols) :-
+	print_spacing(Spacing),
+	print_division_aux(NumCols).
+	
+print_division_aux(0) :-
+	write('\n').
+print_division_aux(NumCols) :-
+	N is NumCols - 1,
+	write(' -'),
+	print_division_aux(N).
+	
+print_horizontal_border(Spacing, NumCols) :-	
+	print_spacing(Spacing),
+	print_line(NumCols),
+	write('\n').
+	
+getSpacing(H, PaintedSpace, SectionsSpace) :-
+	transpose(H, [Painted, Sections]),
+	max_member(MaxPainted, Painted),
+	PaintedSpace is truncate(log(10,MaxPainted)) + 1,
+	max_member(MaxSections, Sections),
+	SectionsSpace is truncate(log(10,MaxSections)) + 1.
+	
+print_spacing(0).
+print_spacing(Spacing) :-
+	X is Spacing - 1,
+	write(' '),
+	print_spacing(X).
+
+print_line(0) :-
+	write('+').
+print_line(NumCols) :-
+	X is NumCols - 1,
+	write('+-'),
+	print_line(X).	
+
+	
+print_puzzle_aux([HWall], [], [Row], [HRule], PaintedSpace, SectionsSpace, Spacing) :-
+	print_horizontal_rule(HRule, PaintedSpace, SectionsSpace),
+	print_row(HWall, Row),
+	write('\n'),
+	length(Row, NumCols),
+	print_horizontal_border(Spacing, NumCols),
+	write('\n').
+
+print_puzzle_aux([HWall|HWalls], [VWall|VWalls], [Row|Rows], [HRule|HRules], PaintedSpace, SectionsSpace, Spacing) :-
+	print_horizontal_rule(HRule, PaintedSpace, SectionsSpace),
+	print_row(HWall, Row),
+	write('\n'),
+	print_vertical_walls(VWall, Spacing),
+	write('\n'),
+	print_puzzle_aux(HWalls, VWalls, Rows, HRules, PaintedSpace, SectionsSpace, Spacing).
+
+print_horizontal_rule([Painted,Sections], PaintedSpace, SectionsSpace) :-
+	print_number_horizontal(Painted, PaintedSpace),
+	write('|'),
+	print_number_horizontal(Sections, SectionsSpace).
+
+print_number_horizontal(_, 0).
+print_number_horizontal(Number, Space) :-
+	N is Space - 1,
+	Digit is Number // 10 ^ N,
+	Remainder is Number rem 10 ^ N,
+	write(Digit),
+	print_number_horizontal(Remainder, N).
+
+print_row(Walls, Elems) :-
+	write('|'),
+	print_row_aux(Walls, Elems).
+	
+print_row_aux([], [Elem]) :-
+	print_elem(Elem),
+	write('|').
+
+print_row_aux([Wall|Walls], [Elem|Elems]) :-
+	print_elem(Elem),
+	print_horizontal_wall(Wall),
+	print_row_aux(Walls, Elems).
+
+print_elem(0) :-
+	write(' ').
+print_elem(1) :-
+	write('*').
+
+print_horizontal_wall(0) :-
+	write(' ').
+print_horizontal_wall(1) :-
+	write('|').
+
+print_vertical_walls(VWall, Spacing) :-
+	print_spacing(Spacing),
+	print_vertical_walls_aux(VWall).
+	
+print_vertical_walls_aux([]) :-
+	write('+').
+	
+print_vertical_walls_aux([VWall|VWalls]) :-
+	write('+'),
+	print_vertical_wall(VWall),
+	print_vertical_walls_aux(VWalls).
+	
+print_vertical_wall(0) :-
+	write(' ').
+print_vertical_wall(1) :-
+	write('-').
 
 /* Gerar um tabuleiro aleatorio */
 
