@@ -196,7 +196,12 @@ Há três formas de ganhar o jogo. Uma já foi dita anteriormente (ter uma ilha 
 \subsubsection{Ilha completa}
 
 Um jogador vence quando todas as peças restantes da sua cor, ou da sua forma, estão conectadas.
-Se todas as peças de uma cor ou forma estão conectadas quando o tabuleiro é inicialmente construído, o jogador que colocar as torres deve inicalmente trocar duas peças cuja numeração no formato de jogo usado (ver figuras \ref{fig:syrtismajor} e \ref{fig:syrtisminor}) sejam seguidas. Por exemplo, trocar a peça 11 com a peça 12. Deve continuar a usar-se este método até que tal deixe de acontecer.
+Se todas as peças de\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{outputboard.png}
+\caption{Output produzido no terminal para o tabuleiro}
+\label{fig:outputboard}
+\end{figure} uma cor ou forma estão conectadas quando o tabuleiro é inicialmente construído, o jogador que colocar as torres deve inicalmente trocar duas peças cuja numeração no formato de jogo usado (ver figuras \ref{fig:syrtismajor} e \ref{fig:syrtisminor}) sejam seguidas. Por exemplo, trocar a peça 11 com a peça 12. Deve continuar a usar-se este método até que tal deixe de acontecer.
 
 \subsubsection{Areias movediças}
 
@@ -254,7 +259,12 @@ beggining_board(Board) :- Board =
  	[[' ','P','Q'], [' ','P','Q'], [' ','B','C'], [' ','P','C'],
  	 [' ','P','Q'], [' ','P','C'], [' ','B','Q']],
  	[[' ',' ',' '], ['T','B','Q'], [' ','P','Q'], [' ','B','C'],
- 	 [' ','B','Q'], [' ','B','C'], [' ',' ',' ']],
+ 	 [' ','B','Q'], \begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{outputboard.png}
+\caption{Output produzido no terminal para o tabuleiro}
+\label{fig:outputboard}
+\end{figure}[' ','B','C'], [' ',' ',' ']],
  	[[' ',' ',' '], [' ',' ',' '], [' ','P','C'], [' ','P','C'],
  	 [' ','P','Q'], [' ',' ',' '], [' ',' ',' ']]].
 \end{lstlisting}
@@ -287,10 +297,20 @@ end_board(Board) :- Board =
 	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
  	[[' ',' ',' '], [' ',' ',' '], [' ',' ',' '], [' ',' ',' '],
  	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
-	[[' ',' ',' '], [' ',' ',' '], ['L','B','C'], [' ',' ',' '],
+	[[' ',' ',' '], \begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{outputboard.png}
+\caption{Output produzido no terminal para o tabuleiro}
+\label{fig:outputboard}
+\end{figure}[' ',' ',' '], ['L','B','C'], [' ',' ',' '],
 	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
 	[[' ',' ',' '], [' ',' ',' '], [' ','P','C'], [' ','Q','B'],
-	 [' ',' ',' '], [' ',' ',' '], [' ',' ',' ']],
+	 [' ',' ',' '], \begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{outputboard.png}
+\caption{Output produzido no terminal para o tabuleiro}
+\label{fig:outputboard}
+\end{figure}[' ',' ',' '], [' ',' ',' ']],
  	[[' ',' ',' '], [' ',' ',' '], [' ','P','C'], [' ','B','C'],
  	 ['T','B','C'], [' ',' ',' '], [' ',' ',' ']],
  	[['L','B','Q'], [' ','B','C'], ['T','P','Q'], [' ','P','Q'],

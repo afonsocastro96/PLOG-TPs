@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.10.7)  8 NOV 2015 14:41
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.10.7)  13 DEC 2015 21:25
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -580,49 +580,49 @@ File: slidetile.png Graphic file (type png)
 Package pdftex.def Info: slidetile.png used on input line 179.
 (pdftex.def)             Requested size: 208.67769pt x 172.54301pt.
  [6 <./towermovement.png>] [7 <./sinktile.png> <./slidetile.png>]
-<win.png, id=48, 198.7425pt x 182.6825pt>
+<outputboard.png, id=48, 271.0125pt x 271.0125pt>
+File: outputboard.png Graphic file (type png)
+ <use outputboard.png>
+Package pdftex.def Info: outputboard.png used on input line 201.
+(pdftex.def)             Requested size: 135.5059pt x 135.5059pt.
+
+<win.png, id=49, 198.7425pt x 182.6825pt>
 File: win.png Graphic file (type png)
  <use win.png>
-Package pdftex.def Info: win.png used on input line 220.
+Package pdftex.def Info: win.png used on input line 225.
 (pdftex.def)             Requested size: 178.86658pt x 164.4127pt.
- [8 <./win.png>]
-Overfull \hbox (57.00407pt too wide) in paragraph at lines 246--247
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[8 <./outputboard.png (PNG copy)>]
+Overfull \hbox (57.00407pt too wide) in paragraph at lines 251--252
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (57.00409pt too wide) in paragraph at lines 248--249
+Overfull \hbox (57.00409pt too wide) in paragraph at lines 253--254
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (63.00415pt too wide) in paragraph at lines 250--251
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 255--256
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (63.00415pt too wide) in paragraph at lines 252--253
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 257--258
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (63.00415pt too wide) in paragraph at lines 254--255
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 259--260
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
-Overfull \hbox (63.00415pt too wide) in paragraph at lines 256--257
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 261--262
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
- []
-
-
-Overfull \hbox (63.00415pt too wide) in paragraph at lines 258--259
-[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
- []
-
-
-Overfull \hbox (63.00414pt too wide) in paragraph at lines 266--267
-[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
@@ -630,24 +630,9 @@ Overfull \hbox (63.00415pt too wide) in paragraph at lines 268--269
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
-
-Overfull \hbox (63.00415pt too wide) in paragraph at lines 270--271
-[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
- []
-
-
-Overfull \hbox (63.00415pt too wide) in paragraph at lines 272--273
-[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
- []
-
-
-Overfull \hbox (63.00415pt too wide) in paragraph at lines 274--275
-[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
- []
-
-
-Overfull \hbox (63.00415pt too wide) in paragraph at lines 276--277
-[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+[9 <./win.png>]
+Overfull \hbox (63.00414pt too wide) in paragraph at lines 276--277
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
@@ -655,9 +640,24 @@ Overfull \hbox (63.00415pt too wide) in paragraph at lines 278--279
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
-[9]
-Overfull \hbox (63.00414pt too wide) in paragraph at lines 286--287
-[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 280--281
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 282--283
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 284--285
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 286--287
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
@@ -666,23 +666,8 @@ Overfull \hbox (63.00415pt too wide) in paragraph at lines 288--289
  []
 
 
-Overfull \hbox (63.00415pt too wide) in paragraph at lines 290--291
-[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
- []
-
-
-Overfull \hbox (63.00415pt too wide) in paragraph at lines 292--293
-[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
- []
-
-
-Overfull \hbox (63.00415pt too wide) in paragraph at lines 294--295
-[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
- []
-
-
-Overfull \hbox (63.00415pt too wide) in paragraph at lines 296--297
-[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+Overfull \hbox (63.00414pt too wide) in paragraph at lines 296--297
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
 
@@ -690,92 +675,105 @@ Overfull \hbox (63.00415pt too wide) in paragraph at lines 298--299
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
  []
 
-<outputboard.png, id=56, 271.0125pt x 271.0125pt>
+
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 307--308
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 314--315
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 316--317
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (63.00415pt too wide) in paragraph at lines 318--319
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+[10]
 File: outputboard.png Graphic file (type png)
  <use outputboard.png>
-Package pdftex.def Info: outputboard.png used on input line 330.
+Package pdftex.def Info: outputboard.png used on input line 350.
 (pdftex.def)             Requested size: 135.5059pt x 135.5059pt.
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[10] <makeplay.png, id=60, 648.4225pt x 479.7925pt>
+ [11] <makeplay.png, id=63, 648.4225pt x 479.7925pt>
 File: makeplay.png Graphic file (type png)
- <use makeplay.png>
-Package pdftex.def Info: makeplay.png used on input line 361.
+
+<use makeplay.png>
+Package pdftex.def Info: makeplay.png used on input line 381.
 (pdftex.def)             Requested size: 324.21045pt x 239.89565pt.
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[11 <./outputboard.png (PNG copy)>] [12 <./makeplay.png>]
-Overfull \hbox (4.99123pt too wide) in paragraph at lines 443--444
+ [12 <./makeplay.png>] [13]
+Overfull \hbox (4.99123pt too wide) in paragraph at lines 463--464
 []\OT1/cmr/m/n/10 Se este pre-di-cado su-ce-der, ent~ao o ven-ce-dor es-tar^^Sa
  em Win-ner. Caso contr^^Sario,
  []
 
-[13] <startgame.png, id=75, 645.41125pt x 52.195pt>
+<startgame.png, id=75, 645.41125pt x 52.195pt>
 File: startgame.png Graphic file (type png)
  <use startgame.png>
-Package pdftex.def Info: startgame.png used on input line 464.
+Package pdftex.def Info: startgame.png used on input line 484.
 (pdftex.def)             Requested size: 322.70483pt x 26.09743pt.
 
 <botdifficulty.png, id=76, 644.4075pt x 69.25874pt>
 File: botdifficulty.png Graphic file (type png)
  <use botdifficulty.png>
-Package pdftex.def Info: botdifficulty.png used on input line 473.
+Package pdftex.def Info: botdifficulty.png used on input line 493.
 (pdftex.def)             Requested size: 322.20296pt x 34.62927pt.
 
 <pickboard.png, id=77, 644.4075pt x 119.44624pt>
 File: pickboard.png Graphic file (type png)
  <use pickboard.png>
-Package pdftex.def Info: pickboard.png used on input line 482.
+Package pdftex.def Info: pickboard.png used on input line 502.
 (pdftex.def)             Requested size: 322.20296pt x 59.72296pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
 
 <picktower.png, id=78, 642.4pt x 313.17pt>
 File: picktower.png Graphic file (type png)
  <use picktower.png>
-Package pdftex.def Info: picktower.png used on input line 491.
+Package pdftex.def Info: picktower.png used on input line 511.
 (pdftex.def)             Requested size: 321.19922pt x 156.58461pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<playtime.png, id=79, 645.41125pt x 308.15125pt>
+[14 <./startgame.png> <./botdifficulty.png>]
+<playtime.png, id=82, 645.41125pt x 308.15125pt>
 File: playtime.png Graphic file (type png)
  <use playtime.png>
-Package pdftex.def Info: playtime.png used on input line 500.
+Package pdftex.def Info: playtime.png used on input line 520.
 (pdftex.def)             Requested size: 322.70483pt x 154.07524pt.
 
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-<playmade.png, id=80, 644.4075pt x 209.78375pt>
+<playmade.png, id=83, 644.4075pt x 209.78375pt>
 File: playmade.png Graphic file (type png)
  <use playmade.png>
-Package pdftex.def Info: playmade.png used on input line 509.
+Package pdftex.def Info: playmade.png used on input line 529.
 (pdftex.def)             Requested size: 322.20296pt x 104.8916pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<gameend.jpg, id=81, 645.41125pt x 360.34625pt>
+<gameend.jpg, id=84, 645.41125pt x 360.34625pt>
 File: gameend.jpg Graphic file (type jpg)
  <use gameend.jpg>
-Package pdftex.def Info: gameend.jpg used on input line 518.
+Package pdftex.def Info: gameend.jpg used on input line 538.
 (pdftex.def)             Requested size: 322.70483pt x 180.17268pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[14 <./startgame.png> <./botdifficulty.png> <./pickboard.png>]
-Overfull \hbox (1.83289pt too wide) in paragraph at lines 527--528
+[15 <./pickboard.png> <./picktower.png> <./playtime.png>]
+Overfull \hbox (1.83289pt too wide) in paragraph at lines 547--548
 []\OT1/cmr/m/n/10 O jogo exi-giu ao grupo bas-tante tempo e de-dica^^Xc~ao para
  a sua im-ple-menta^^Xc~ao.
  []
 
-[15 <./picktower.png> <./playtime.png>] [16 <./playmade.png> <./gameend.jpg (PN
-G copy)>]
+[16 <./playmade.png> <./gameend.jpg (PNG copy)>]
 No file template.bbl.
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2013/08/26 1.5b listings language file
@@ -797,26 +795,30 @@ LaTeX Font Info:    Font shape `OMS/cmr/m/it' in size <10> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 74.
  [19]
 [20] [21] [22] [23] [24] [25] [26] [27] [28] [29] [30] [31] [32] [33] [34]
-[35]) [36] (./template.aux) ) 
+[35]) [36] (./template.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
 Here is how much of TeX's memory you used:
- 5565 strings out of 493304
- 76341 string characters out of 6139871
- 365123 words of memory out of 5000000
- 8918 multiletter control sequences out of 15000+600000
+ 5575 strings out of 493304
+ 76506 string characters out of 6139871
+ 366121 words of memory out of 5000000
+ 8928 multiletter control sequences out of 15000+600000
  9975 words of font info for 36 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
  38i,8n,43p,811b,1681s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/
-amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
-ts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/
-cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10
-.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></
-usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texl
-ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist
-/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on template.pdf (36 pages, 639376 bytes).
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texl
+ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts
+/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmti10.pfb>
+Output written on template.pdf (36 pages, 641944 bytes).
 PDF statistics:
  188 PDF objects out of 1000 (max. 8388607)
  111 compressed objects within 2 object streams
