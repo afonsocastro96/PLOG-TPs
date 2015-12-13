@@ -55,9 +55,10 @@ horizontalNumbers(Numbers) :- Numbers = [	[3,3],
 											[5,2],
 											[4,2]].									
 
-var_table(0, _, []).
+var_table(0, _, []) :- !.
 
 var_table(M, N, T) :-
+	M > 0, !,
 	length(Row, N),
 	M1 is M - 1,
 	var_table(M1, N, T1),
@@ -72,12 +73,12 @@ doubleCrossAPix(HP, VP, NRows, NCols, V, H) :-
 	doubleCrossAPix(HP, VP, T, V, H).
 
 doubleCrossAPixSolver(HP, VP, T, V, H) :-	
-	append(T, Var),
-	domain(Var, 0, 1),
+	append(T, Vars),
+	domain(Vars, 0, 1),
 	groupsWithSameColour(HP,VP,T),
 	horizontalRule(T,H),
 	verticalRule(T,V),
-	labeling([ff,enum],Var).
+	labeling([ff,enum],Vars).
 
 /* Para cada elemento pertencente ao mesmo bloco, a sua cor tem de ser igual  */
 
@@ -155,38 +156,84 @@ print_row([1|Row]) :- write('+ '), print_row(Row).
 
 /* Gerar um tabuleiro aleatorio */
 
-/* Gerar uma matriz de informacoes referentes as paredes de tamanho M*N*/
-generate_board(_,0,[]).
-generate_board(M,N,[Row|T]) :- generate_row(M,Row), X is N-1, generate_board(M,X,T).
-generate_row(0, []).
-generate_row(M,[Elem|Row]) :- X is M-1, random(0,2,Elem), generate_row(X, Row).
+/* Gerar uma matriz de informacoes referentes as paredes de tamanho M*N */
+generate_walls(0,_,[]) :- !.
+generate_walls(M,N,[Row|T]) :- M > 0, !, generate_line_walls(N,Row), M1 is M-1, generate_walls(M1,N,T).
+generate_line_walls(0, []) :- !.
+generate_line_walls(N,[Elem|Row]) :- N > 0, !, N1 is N-1, random(0,2,Elem), generate_line_walls(N1, Row).
 
 /* Gerar as duas matrizes com informacao referente aos quadrados pintados / seccoes */
-
+get_horizontal_numbers([], []).
 get_horizontal_numbers([Row|Rows], [[PaintedSquares, NumberSections]|NumbersRows]) :- 
 	get_row_numbers(Row, PaintedSquares),
 	get_row_sections(Row, NumberSections),
 	get_horizontal_numbers(Rows, NumbersRows).
 
-get_row_numbers([], 0).
-get_row_numbers([0|Row], PaintedSquares) :- get_row_numbers(Row, PaintedSquares).
-get_row_numbers([1|Row], PaintedSquares) :- X is PaintedSquares - 1, get_row_numbers(Row, X).
+get_row_numbers(Row, PaintedSquares) :-
+	sumlist(Row, PaintedSquares).
 
+get_row_sections([Elem|Row], NumberSections) :-
+	get_row_sections_aux(Row, Elem, Elem, NumberSections).
 get_row_sections_aux([], _, N, N).
 get_row_sections_aux([1|Row], 0, CurrentNumberSections, NumberSections) :- 
 	N is CurrentNumberSections + 1,
-	get_row_sections_aux(Row, Elem, N, NumberSections). 
+	get_row_sections_aux(Row, 1, N, NumberSections). 
 get_row_sections_aux([Elem|Row], _,CurrentNumberSections, NumberSections) :- 
 	get_row_sections_aux(Row, Elem, CurrentNumberSections, NumberSections).
 
 get_vertical_numbers(Rows, Rules) :-
 	transpose(Rows, Cols), get_horizontal_numbers(Cols, Rules).
 
-/* Gerar um tabuleiro aleatorio M por N */
-random_board(M, N, T) :-
-	generate_board(M, N, HP),
-	generate_board(M, N, VP),
-	get_horizontal_numbers(HP, H),
-	get_vertical_numbers(VP, V),
-	doubleCrossAPix(HP, VP, T, V, H),
-	print_solution(T).
+/* Gerar um jogo M por N */
+game_generator(M, N, HP, VP, H, V) :-
+	generate_walls(M, N, HP, VP),
+	var_table(M, N, T),
+	paint_board(HP, VP, T),
+	calculateRules(T, H, V).
+	
+generate_walls(M, N, HP, VP) :-
+	N1 is N - 1,
+	generate_walls(M, N1, HP),
+	generate_walls(M, N1, VP).
+	
+paint_board(HP, VP, T) :-
+	append(T, Vars),
+	domain(Vars, 0, 1),
+	groupsWithSameColour(HP,VP,T),
+	restrainRandomPositions(T),
+	labeling([ff,enum],Vars).
+	
+calculateRules(T, H, V) :-
+	get_horizontal_numbers(T, H),
+	get_vertical_numbers(T,V).
+	
+restrainRandomPositions(T) :-
+	getBoardSize(T, NumRows, NumCols),
+	MinElems is truncate(sqrt(min(NumRows, NumCols))),
+	MaxElems is truncate(sqrt(NumRows * NumCols)) + 1,
+	random(MinElems, MaxElems, NumElemsToPaint),
+	getRandomPositions(NumElemsToPaint, NumRows, NumCols, Positions),
+	restrainElems(Positions, T).
+	
+getBoardSize(T, NumRows, NumCols) :-
+	length(T, NumRows),
+	nth0(0, T, Row),
+	length(Row, NumCols).
+	
+getRandomPositions(NumPositions, NumRows, NumCols, Positions) :-
+	getRandomPositionsAux(NumPositions, NumRows, NumCols, PositionsList),
+	remove_dups(PositionsList, Positions).
+getRandomPositionsAux(0, _,_,[]) :- !.
+getRandomPositionsAux(NumPositions, NumRows, NumCols, [[Row,Col]|Positions]) :-
+	NumPositions > 0, !, 
+	random(0, NumRows, Row),
+	random(0, NumCols, Col),
+	X is NumPositions - 1,
+	getRandomPositions(X, NumRows, NumCols, Positions).
+	
+restrainElems([], _).
+restrainElems([[Row,Col]|Positions], T) :-
+	nth0(Row, T, TRow),
+	nth0(Col, TRow, Elem),
+	Elem #= 1,
+	restrainElems(Positions, T).
