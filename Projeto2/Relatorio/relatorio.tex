@@ -40,7 +40,6 @@ Este artigo descreve então o puzzle DualClue Cross-a-pix, a abordagem utilizada
 
 
 \begin{figure}[h]
-\ref{fig:puzzlesolved}
 \centering
 \includegraphics[scale=0.5]{res/puzzlesolved.png}
 \caption{Puzzle DualClue Cross-a-Pix depois de resolvido}
@@ -52,7 +51,6 @@ Este artigo descreve então o puzzle DualClue Cross-a-pix, a abordagem utilizada
 O DualClue Cross-a-Pix é um puzzle que consiste numa matriz M x N, dividida em várias regiões, com duas pistas em cada linha e coluna - a primeira representa o número de quadrados que estão pintados ao longo dessa linha/coluna, e a segunda representa o número de blocos (ou seja, o número de secções de quadrados pintados consecutivamente, como se pode ver na fig. \ref{fig:section}) ao longo dessa linha/coluna. Todos os quadrados de uma secção devem estar ou pintados ou não pintados.
 
 \begin{figure}[h]
-\ref{fig:emptypuzzle}
 \centering
 \includegraphics[scale=0.5]{res/emptypuzzle.png}
 \caption{Estado do puzzle antes de ser começado. Podemos ver no topo e à esquerda as pistas dadas ao jogador}
@@ -60,7 +58,6 @@ O DualClue Cross-a-Pix é um puzzle que consiste numa matriz M x N, dividida em 
 \end{figure}
 
 \begin{figure}[h]
-\ref{fig:section}
 \centering
 \includegraphics[scale=0.5]{res/section.png}
 \caption{Uma secção}
@@ -72,8 +69,8 @@ O DualClue Cross-a-Pix é um puzzle que consiste numa matriz M x N, dividida em 
 Na implementação do puzzle em Prolog, optámos por representar os dados em várias estruturas de dados:
 
 \begin{itemize}
-\item Uma lista de listas, de tamanho M-1 x N-1 em que cada elemento toma o valor 0 ou 1, significando 1 ter uma parede à sua direita e 0 a sua ausência (define-se uma parede como sendo a delimitação de uma região) (definida daqui para a frente como \textbf{HP}).
-\item Outra lista de listas com o mesmo tamanho, que guarda a mesma informação, mas para a existência ou não de parede em baixo (definida daqui para a frente como \textbf{VP}).
+\item Uma lista de listas, de tamanho M x N-1 em que cada elemento toma o valor 0 ou 1, significando 1 ter uma parede à sua direita e 0 a sua ausência (define-se uma parede como sendo a delimitação de uma região) (definida daqui para a frente como \textbf{HP}).
+\item Outra lista de listas com tamanho N x M-1, que guarda a mesma informação, mas para a existência ou não de parede em baixo (definida daqui para a frente como \textbf{VP}).
 \item Uma lista de pares, em que cada par representa os números acima de cada coluna (definida daqui para a frente como \textbf{C}).
 \item Uma lista de pares, em que cada par representa os números acima de cada linha (definida daqui para a frente como \textbf{L}).
 \end{itemize}
@@ -148,7 +145,6 @@ No que toca ao \textit{labeling}, usamos as seguintes estratégias:
 A solução do puzzle é mostrada no ecrã de forma simples, mas de fácil percepção. A figura \ref{fig:outputboard} mostra o resultado após o programa resolver um puzzle.
 
 \begin{figure}[h]
-\ref{fig:outputboard}
 \centering
 \includegraphics[scale=0.5]{res/output.png}
 \caption{Output produzido no terminal para o puzzle}
