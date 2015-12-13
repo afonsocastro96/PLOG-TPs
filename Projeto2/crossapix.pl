@@ -2,6 +2,8 @@
 :- use_module(library(lists)).
 :- use_module(library(random)).
 
+/* Predicados para testar e avaliar tempos de execucao */
+
 assess_time_generator(Tries, M, N, Average) :-
 	assess_time_generator_aux(Tries, M, N, Times),
 	sumlist(Times, Sum),
