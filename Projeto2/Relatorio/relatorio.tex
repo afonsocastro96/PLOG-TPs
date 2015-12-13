@@ -85,7 +85,7 @@ A solução é dada numa lista de listas (daqui para a frente referida como \tex
 Apresentamos de seguida o predicado que determina a solução:
 
 \begin{lstlisting}
-doubleCrossAPixSolver(HP, VP, T, V, H) :-	
+doubleCrossAPixSolver(-HP, -VP, +T, -V, -H) :-	
 	append(T, Vars),
 	domain(Vars, 0, 1),
 	groupsWithSameColour(HP,VP,T),
@@ -167,42 +167,47 @@ Em que HP, VP, T, H e V têm os significados já descritos anteriormente.
 
 Foram realizados vários testes para avaliar a prestação do programa, sujeitando-o a várias condições, com complexidade diferente. Para avaliar a sua prestação, recorremos ao predicado statistics/2 para determinar o tempo que decorreu entre o início e o fim da execução do teste. É importante referir que a precisão deste predicado vai até ao centésimo de segundo.
 
-Foram feitos dois testes, um para testar o tempo necessário para gerar um puzzle e outro para testar o tempo necessário para gerar um puzzle e resolvê-lo. 
+Foram feitos dois testes, um para testar o tempo necessário para gerar um puzzle e outro para testar o tempo necessário para gerar um puzzle e resolvê-lo. Implementámos dois predicados para correr estes testes, sendo eles os seguintes:
+
+\begin{lstlisting}
+assess_time_generator(-Tries, -M, -N, +Average).
+assess_time_generate_and_solve(-Tries, -M, -N, +Average).
+\end{lstlisting}
 
 Apresenta-se então os testes realizados e seus resultados.
 
 \begin{table}[]
-\label{gamegenerator}
 \begin{tabular}{cccll}
 \multicolumn{1}{l}{\textbf{Tamanho do Puzzle}} & \multicolumn{1}{l}{\textbf{Número de execuções}} & \multicolumn{1}{l}{\textbf{Tempo médio de execução}} &  &  \\
-5x5                                            & 30                                               & 0.002s                                               &  &  \\
-10x10                                          & 30                                               & 0.003s                                               &  &  \\
-20x20                                          & 30                                               & 0.007s                                               &  &  \\
-50x50                                          & 30                                               & 0.052s                                               &  &  \\
-100x100                                        & 30                                               & 0.193s                                               &  & 
+5x5                                            & 300                                              & 0.0011s                                               &  &  \\
+10x10                                          & 300                                              & 0.0022s                                               &  &  \\
+20x20                                          & 300                                              & 0.0063s                                               &  &  \\
+50x50                                          & 100                                              & 0.0385s                                               &  &  \\
+100x100                                        & 100                                               & 0.1724s                                               &  & 
 \end{tabular}
 \caption{Resultados do teste ao tempo necessário para gerar um puzzle}
 \end{table}
 
+
 \begin{table}[]
 \centering
+
 \begin{tabular}{cccll}
 \multicolumn{1}{l}{\textbf{Tamanho do Puzzle}} & \multicolumn{1}{l}{\textbf{Número de execuções}} & \multicolumn{1}{l}{\textbf{Tempo médio de execução}} &  &  \\
-5x5                                            & 30                                               & 0.002s                                               &  &  \\
-10x10                                          & 30                                               & 0.010s                                               &  &  \\
-20x20                                          & 30                                               & 0.023s                                               &  &  \\
-40x40                                          & 15                                               & 8.223s                                               &  & 
+5x5                                            & 100                                              & 0.0008s                                              &  &  \\
+10x10                                          & 100                                              & 0.0063s                                              &  &  \\
+50x50                                          & 100                                              & 0.0518s                                              &  &  \\
+100x100                                        & 100                                              & 0.2143s                                              &  & 
 \end{tabular}
 \caption{Resultados do teste ao tempo necessário para gerar um puzzle e resolvê-lo}
-\label{gemegeneratorandsolver}
 \end{table}
 
-Salientamos ainda que tentámos testar para puzzles 50x50 e 100x100, mas a maior parte dos mesmos não eram resolúveis em tempo útil, chegado a estar mais de 15 minutos à espera de uma solução. Com isto, podemos tirar várias conclusões:
+Com isto, podemos tirar várias conclusões:
 
 \begin{itemize}
 \item O programa encontra soluções bastante rápido para puzzles com tamanho até 40x40. A partir daí, começa a demorar bastante tempo para conseguir resolver o puzzle. No entanto, tendo em conta que o número de células e regiões começa a entrar na ordem dos milhares, e as hipóteses a testar na ordem dos decaliões, tal resultado não é de estranhar.
 \item O tempo para resolver um puzzle é bastante superior ao tempo para gerar um puzzle aleatório.
-\item O tempo para gerar um puzzle aumenta de forma linear (de 2500 para 10000 células, houve um aumento de 4 vezes do tempo de execução). Já o mesmo não acontece com a sua resolução, que aumenta de forma exponencial (de 400 para 1600 células há um aumento de cerca de 357 vezes do tempo de execução).
+\item Tanto o tempo para gerar um puzzle, como o tempo para gerar um e resolvê-lo (de 2500 para 10000 células, houve um aumento de 4 vezes do tempo de execução em ambos os casos, e essa tendência é verificável também, por exemplo, de 100 para 400 células no caso da geração e resolução), aumenta de forma linear.
 \end{itemize}
 
 \section{Conclusões}

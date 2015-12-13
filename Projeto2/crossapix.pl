@@ -2,6 +2,37 @@
 :- use_module(library(lists)).
 :- use_module(library(random)).
 
+assess_time_generator(Tries, M, N, Average) :-
+	assess_time_generator_aux(Tries, M, N, Times),
+	sumlist(Times, Sum),
+	length(Times, Length),
+	Average is Sum / Length.
+
+assess_time_generator_aux(0, _, _, []).
+assess_time_generator_aux(Tries, M,N, [Time|Times]) :-
+	statistics(walltime, [Start|_]),
+	test_generator(M, N),
+	statistics(walltime, [End|_]),
+	Time is End - Start,
+	X is Tries - 1,
+	assess_time_generator_aux(X, M, N, Times).
+
+assess_time_generate_and_solve(Tries, M, N, Average) :-
+	assess_time_generate_and_solve_aux(Tries, M, N, Times),
+	sumlist(Times, Sum),
+	length(Times, Length),
+	Average is Sum / Length.
+
+assess_time_generate_and_solve_aux(0, _, _, []).
+assess_time_generate_and_solve_aux(Tries, M,N, [Time|Times]) :-
+	statistics(walltime, [Start|_]),
+	test_generator(M, N),
+	statistics(walltime, [End|_]),
+	Time is End - Start,
+	X is Tries - 1,
+	assess_time_generator_aux(X, M, N, Times).
+
+
 teste :-
 	horizontalWall(HP),
 	verticalWall(VP),
@@ -26,6 +57,7 @@ test_generate_and_solve(M, N) :-
 	game_generator(M, N, HP, VP, H, V),
 	print_white_puzzle(HP, VP, H, V),
 	doubleCrossAPix(HP, VP, M, N, V, H).
+
 	
 horizontalWall(Walls) :- Walls = [
 [0,1,1,0,1,1,0,1,1],
@@ -101,7 +133,7 @@ doubleCrossAPixSolver(HP, VP, T, V, H) :-
 	groupsWithSameColour(HP,VP,T),
 	horizontalRule(T,H),
 	verticalRule(T,V),
-	labeling([ff,enum],Vars).
+	labeling([ffd,enum],Vars).
 
 /* Para cada elemento pertencente ao mesmo bloco, a sua cor tem de ser igual  */
 
