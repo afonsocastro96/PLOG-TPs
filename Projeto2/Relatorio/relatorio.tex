@@ -28,7 +28,6 @@ Rua Roberto Frias, sn, 4200-465 Porto, Portugal\\}
 
 \begin{abstract}
 Este projeto, realizado no âmbito da unidade curricular de Programação em Lógica, vem ajudar a consolidar os conhecimentos mais avançados de Prolog adquiridos deste o primeiro projeto, acerca de Programação em Lógica com restrições, consistindo em escrever um programa Prolog capaz de resolver qualquer puzzle do tipo "DualClue Cross-a-Pix". Este artigo tem então como objetivo complementar e descrever o projeto desenvolvido.
-\keywords{dual clue cross a pix, sicstus, prolog, feup}
 \end{abstract}
 
 
@@ -48,7 +47,7 @@ Este artigo descreve então o puzzle DualClue Cross-a-pix, a abordagem utilizada
 
 \section{Descrição do Problema}
 
-O DualClue Cross-a-Pix é um puzzle que consiste numa matriz M x N, dividida em várias regiões, com duas pistas em cada linha e coluna - a primeira representa o número de quadrados que estão pintados ao longo dessa linha/coluna, e a segunda representa o número de blocos (ou seja, o número de secções de quadrados pintados consecutivamente, como se pode ver na fig. \ref{fig:section}) ao longo dessa linha/coluna. Todos os quadrados de uma secção devem estar ou pintados ou não pintados.
+O DualClue Cross-a-Pix é um puzzle que consiste numa matriz M x N, dividida em várias regiões, com duas pistas em cada linha e coluna - a primeira representa o número de quadrados que estão pintados ao longo dessa linha/coluna, e a segunda representa o número de blocos (ou seja, o número de secções de quadrados pintados consecutivamente, como se pode ver na Fig. \ref{fig:section}) ao longo dessa linha/coluna. Todos os quadrados de uma secção devem estar ou pintados ou não pintados.
 
 \begin{figure}[h]
 \centering
@@ -103,8 +102,8 @@ O puzzle pode ser resolvido recorrendo a 5 restrições:
 \item O numero de blocos pretos de uma linha L tem de ser igual a H[L][1].
 \end{enumerate}
 
-\subsubsection{Para cada elemento pertencente ao mesmo bloco, a sua cor tem de ser igual}
-\paragraph{}
+\subsubsection{Para cada elemento pertencente ao mesmo bloco, a sua cor tem de ser igual.}
+
 Para cada elemento do puzzle, são testados todos os elementos na vertical e horizontal até encontrarmos uma parede - ou seja, fim do bloco. Verifica-se se têm todos a mesma cor.
 Esta restrição é testada no seguinte predicado:
 \paragraph{}
@@ -112,7 +111,7 @@ Esta restrição é testada no seguinte predicado:
 groupsWithSameColour(-HP, -VP, +T).
 \end{lstlisting}
 
-\subsubsection{O numero de quadrados pretos de uma coluna C tem de ser igual a V[C][0] e O numero de blocos pretos de uma coluna C tem de ser igual a V[C][1]}
+\subsubsection{O numero de quadrados pretos de uma coluna C tem de ser igual a V[C][0] e O numero de blocos pretos de uma coluna C tem de ser igual a V[C][1].}
 \paragraph{}
 Percorre-se a coluna C e contam-se os quadrados pintados e as secções. Verifica-se se são iguais a V[C][0] e V[C][1], respetivamente.
 Estas duas restrições são testadas no mesmo predicado, sendo este o seguinte:
@@ -121,7 +120,7 @@ Estas duas restrições são testadas no mesmo predicado, sendo este o seguinte:
 verticalRule(-T,+V).
 \end{lstlisting}
 
-\subsubsection{O numero de quadrados pretos de uma coluna C tem de ser igual a V[C][0] e O numero de blocos pretos de uma coluna C tem de ser igual a V[C][1]}
+\subsubsection{O numero de quadrados pretos de uma coluna C tem de ser igual a V[C][0] e O numero de blocos pretos de uma coluna C tem de ser igual a V[C][1].}
 \paragraph{}
 Percorre-se a linha L e contam-se os quadrados pintados e as secções. Verifica-se se são iguais a H[L][0] e H[L][1], respetivamente.
 Estas duas restrições são testadas no mesmo predicado, sendo este o seguinte:
@@ -142,7 +141,7 @@ No que toca ao \textit{labeling}, usamos as seguintes estratégias:
 
 \section{Visualização da Solução}
 
-A solução do puzzle é mostrada no ecrã de forma simples, mas de fácil percepção. A figura \ref{fig:outputboard} mostra o resultado após o programa resolver um puzzle.
+A solução do puzzle é mostrada no ecrã de forma simples, mas de fácil percepção. A Fig. \ref{fig:outputboard} mostra o resultado após o programa resolver um puzzle.
 
 \begin{figure}[h]
 \centering
@@ -173,6 +172,7 @@ assess_time_generate_and_solve(-Tries, -M, -N, +Average).
 Apresenta-se então os testes realizados e seus resultados.
 
 \begin{table}[]
+\caption{Resultados do teste ao tempo necessário para gerar um puzzle}
 \begin{tabular}{cccll}
 \multicolumn{1}{l}{\textbf{Tamanho do Puzzle}} & \multicolumn{1}{l}{\textbf{Número de execuções}} & \multicolumn{1}{l}{\textbf{Tempo médio de execução}} &  &  \\
 5x5                                            & 300                                              & 0.0011s                                               &  &  \\
@@ -181,13 +181,12 @@ Apresenta-se então os testes realizados e seus resultados.
 50x50                                          & 100                                              & 0.0385s                                               &  &  \\
 100x100                                        & 100                                               & 0.1724s                                               &  & 
 \end{tabular}
-\caption{Resultados do teste ao tempo necessário para gerar um puzzle}
 \end{table}
 
 
 \begin{table}[]
 \centering
-
+\caption{Resultados do teste ao tempo necessário para gerar um puzzle e resolvê-lo}
 \begin{tabular}{cccll}
 \multicolumn{1}{l}{\textbf{Tamanho do Puzzle}} & \multicolumn{1}{l}{\textbf{Número de execuções}} & \multicolumn{1}{l}{\textbf{Tempo médio de execução}} &  &  \\
 5x5                                            & 100                                              & 0.0008s                                              &  &  \\
@@ -195,7 +194,6 @@ Apresenta-se então os testes realizados e seus resultados.
 50x50                                          & 100                                              & 0.0518s                                              &  &  \\
 100x100                                        & 100                                              & 0.2143s                                              &  & 
 \end{tabular}
-\caption{Resultados do teste ao tempo necessário para gerar um puzzle e resolvê-lo}
 \end{table}
 
 Com isto, podemos tirar várias conclusões:
