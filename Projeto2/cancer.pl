@@ -358,9 +358,10 @@ game_generator(M, N, HP, VP, H, V) :-
 	calculateRules(T, H, V).
 	
 generate_walls(M, N, HP, VP) :-
+	M1 is M - 1,
 	N1 is N - 1,
 	generate_walls(M, N1, HP),
-	generate_walls(M, N1, VP).
+	generate_walls(N, M1, VP).
 	
 paint_board(HP, VP, T) :-
 	append(T, Vars),
