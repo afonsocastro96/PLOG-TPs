@@ -1,5 +1,4 @@
 \documentclass[runningheads,a4paper]{llncs}
-
 \usepackage[portuguese]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage{amssymb}
@@ -133,6 +132,16 @@ Estas duas restrições são testadas no mesmo predicado, sendo este o seguinte:
 \begin{lstlisting}
 horizontalRule(-T,+H).
 \end{lstlisting}
+
+\subsection{Estratégia de Pesquisa}
+
+No que toca ao \textit{labeling}, usamos as seguintes estratégias:
+
+\begin{itemize}
+\item Escolha de variável:  estratégia 'ffc', que consiste na escolha da variável de menor domínio com maior número de restrições.
+\item Ordenação de valores do domínio: estratégia 'up', que seleciona os valores do domínio por ordem ascendente.
+\item Branching : estratégia 'enum', atribuindo sequencialmente os valores do domínio à variável.
+\end{itemize}
 
 \section{Visualização da Solução}
 
